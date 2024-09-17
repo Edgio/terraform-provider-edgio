@@ -18,24 +18,19 @@ type AccessTokenResponse struct {
 	Scope       string `json:"scope"`
 }
 
-// PropertiesResponse represents the entire response from the properties endpoint.
-type PropertiesResponse struct {
-	Type       string                `json:"@type"`
-	ID         string                `json:"@id"`
-	Links      properties.Links      `json:"@links"`
-	TotalItems int                   `json:"total_items"`
-	Items      []properties.Property `json:"items"`
+type TokenCache struct {
+	AccessToken string
+	Expiry      time.Time
 }
 
 // EdgioClient manages communication with the Edgio API.
 type EdgioClient struct {
 	client       *resty.Client
-	token        string
-	tokenExpiry  time.Time
 	clientID     string
 	clientSecret string
 	tokenURL     string
 	apiURL       string
+	tokenCache   map[string]TokenCache
 }
 
 // NewEdgioClient creates a new EdgioClient instance with necessary details.
@@ -55,44 +50,54 @@ func NewEdgioClient(clientID, clientSecret, tokenURL, apiURL string) *EdgioClien
 	}
 }
 
-func (e *EdgioClient) getToken() error {
+func (c *EdgioClient) getToken(scope string) (string, error) {
+	// Check if we have a valid cached token for the given scope
+	if cachedToken, exists := c.tokenCache[scope]; exists && time.Now().Before(cachedToken.Expiry) {
+		return cachedToken.AccessToken, nil
+	}
+
+	// If not cached or expired, fetch a new token
 	var tokenResp AccessTokenResponse
-	resp, err := e.client.R().
+	resp, err := c.client.R().
 		SetFormData(map[string]string{
-			"client_id":     e.clientID,
-			"client_secret": e.clientSecret,
+			"client_id":     c.clientID,
+			"client_secret": c.clientSecret,
 			"grant_type":    "client_credentials",
-			"scope":         "app.accounts",
+			"scope":         scope,
 		}).
 		SetResult(&tokenResp).
-		Post(e.tokenURL)
+		Post(c.tokenURL)
 
 	if err != nil {
-		return fmt.Errorf("failed to request token: %w", err)
+		return "", fmt.Errorf("failed to request token: %w", err)
 	}
 
 	if resp.StatusCode() != 200 {
-		return fmt.Errorf("unexpected status code for getToken: %d", resp.StatusCode())
+		return "", fmt.Errorf("unexpected status code for getToken: %d", resp.StatusCode())
 	}
 
-	e.token = tokenResp.AccessToken
-	e.tokenExpiry = time.Now().Add(time.Duration(tokenResp.ExpiresIn) * time.Second)
-	return nil
+	// Cache the new token
+	c.tokenCache[scope] = TokenCache{
+		AccessToken: tokenResp.AccessToken,
+		Expiry:      time.Now().Add(time.Duration(tokenResp.ExpiresIn) * time.Second),
+	}
+
+	// Return the access token
+	return tokenResp.AccessToken, nil
 }
 
-func (e *EdgioClient) GetSpecificProperty(ctx context.Context, propertyID string) (*properties.Property, error) {
-	if e.token == "" || time.Now().After(e.tokenExpiry) {
-		if err := e.getToken(); err != nil {
-			return nil, fmt.Errorf("failed to get token: %w", err)
-		}
+func (c *EdgioClient) GetProperty(ctx context.Context, propertyID string) (*properties.Property, error) {
+	token, err := c.getToken("app.accounts")
+	if err != nil {
+		return nil, fmt.Errorf("failed to get token: %w", err)
 	}
 
 	var property properties.Property
-	resp, err := e.client.R().
+	resp, err := c.client.R().
 		SetContext(ctx).
-		SetAuthToken(e.token).
+		SetAuthToken(token).
 		SetResult(&property).
-		Get(fmt.Sprintf("%s/properties/%s", e.apiURL, propertyID))
+		Get(fmt.Sprintf("%s/properties/%s", c.apiURL, propertyID))
 
 	if err != nil {
 		return nil, fmt.Errorf("failed to send request: %w", err)
@@ -105,23 +110,22 @@ func (e *EdgioClient) GetSpecificProperty(ctx context.Context, propertyID string
 	return &property, nil
 }
 
-func (e *EdgioClient) GetProperties(page int, pageSize int, organizationID string) (*PropertiesResponse, error) {
-	if e.token == "" || time.Now().After(e.tokenExpiry) {
-		if err := e.getToken(); err != nil {
-			return nil, fmt.Errorf("failed to get token: %w", err)
-		}
+func (c *EdgioClient) GetProperties(page int, pageSize int, organizationID string) (*properties.Properties, error) {
+	token, err := c.getToken("app.accounts")
+	if err != nil {
+		return nil, fmt.Errorf("failed to get token: %w", err)
 	}
 
-	var propertiesResp PropertiesResponse
-	resp, err := e.client.R().
-		SetAuthToken(e.token).
+	var propertiesResp properties.Properties
+	resp, err := c.client.R().
+		SetAuthToken(token).
 		SetQueryParams(map[string]string{
 			"page":            fmt.Sprintf("%d", page),
 			"page_size":       fmt.Sprintf("%d", pageSize),
 			"organization_id": organizationID,
 		}).
 		SetResult(&propertiesResp).
-		Get(fmt.Sprintf("%s/properties", e.apiURL))
+		Get(fmt.Sprintf("%s/properties", c.apiURL))
 
 	if err != nil {
 		return nil, fmt.Errorf("failed to send request: %w", err)
@@ -134,17 +138,16 @@ func (e *EdgioClient) GetProperties(page int, pageSize int, organizationID strin
 	return &propertiesResp, nil
 }
 
-func (e *EdgioClient) CreateProperty(ctx context.Context, organizationID, slug string) (*properties.Property, error) {
-	if e.token == "" || time.Now().After(e.tokenExpiry) {
-		if err := e.getToken(); err != nil {
-			return nil, fmt.Errorf("failed to get token: %w", err)
-		}
+func (c *EdgioClient) CreateProperty(ctx context.Context, organizationID, slug string) (*properties.Property, error) {
+	token, err := c.getToken("app.accounts")
+	if err != nil {
+		return nil, fmt.Errorf("failed to get token: %w", err)
 	}
 
 	var createdProperty properties.Property
-	resp, err := e.client.R().
+	resp, err := c.client.R().
 		SetContext(ctx).
-		SetAuthToken(e.token).
+		SetAuthToken(token).
 		SetHeader("Content-Type", "application/json").
 		SetBody(map[string]string{
 			"organization_id": organizationID,
@@ -165,10 +168,15 @@ func (e *EdgioClient) CreateProperty(ctx context.Context, organizationID, slug s
 }
 
 func (c *EdgioClient) DeleteProperty(propertyID string) error {
+	token, err := c.getToken("app.accounts")
+	if err != nil {
+		return fmt.Errorf("failed to get token: %w", err)
+	}
+
 	url := fmt.Sprintf("%s/accounts/v0.1/properties/%s", c.apiURL, propertyID)
 
 	resp, err := c.client.R().
-		SetAuthToken(c.token).
+		SetAuthToken(token).
 		Delete(url)
 
 	if err != nil {
@@ -176,8 +184,39 @@ func (c *EdgioClient) DeleteProperty(propertyID string) error {
 	}
 
 	if resp.StatusCode() != http.StatusOK {
-		return fmt.Errorf("error deleting property: status code %d", resp.StatusCode())
+		return fmt.Errorf("error deleting property: status code %d, response body: %s", resp.StatusCode(), resp.Body())
 	}
 
 	return nil
+}
+
+func (c *EdgioClient) UpdateProperty(ctx context.Context, propertyID string, slug string) (*properties.Property, error) {
+	token, err := c.getToken("app.accounts")
+	if err != nil {
+		return nil, fmt.Errorf("failed to get token: %w", err)
+	}
+
+	url := fmt.Sprintf("%s/properties/%s", c.apiURL, propertyID)
+
+	requestBody := map[string]interface{}{
+		"slug": slug,
+	}
+
+	var updatedProperty properties.Property
+	resp, err := c.client.R().
+		SetContext(ctx).
+		SetAuthToken(token).
+		SetBody(requestBody).
+		SetResult(&updatedProperty).
+		Patch(url)
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to send request: %w", err)
+	}
+
+	if resp.StatusCode() != http.StatusOK {
+		return nil, fmt.Errorf("unexpected status code for updateProperty: %d, response body: %s", resp.StatusCode(), resp.Body())
+	}
+
+	return &updatedProperty, nil
 }

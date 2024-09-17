@@ -21,7 +21,6 @@ output "property_details" {
     organization_id: data.edgio_property.my_specific_property.organization_id,
     slug: data.edgio_property.my_specific_property.slug,
     created_at: data.edgio_property.my_specific_property.created_at,
-    updated_at: data.edgio_property.my_specific_property.updated_at,
-    
+    updated_at: data.edgio_property.my_specific_property.updated_at,  
   }
 }

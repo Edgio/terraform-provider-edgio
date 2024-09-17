@@ -1,18 +1,6 @@
-# Terraform Provider Scaffolding (Terraform Plugin Framework)
+# Edgio Terraform Provider
 
-_This template repository is built on the [Terraform Plugin Framework](https://github.com/hashicorp/terraform-plugin-framework). The template repository built on the [Terraform Plugin SDK](https://github.com/hashicorp/terraform-plugin-sdk) can be found at [terraform-provider-scaffolding](https://github.com/hashicorp/terraform-provider-scaffolding). See [Which SDK Should I Use?](https://developer.hashicorp.com/terraform/plugin/framework-benefits) in the Terraform documentation for additional information._
-
-This repository is a *template* for a [Terraform](https://www.terraform.io) provider. It is intended as a starting point for creating Terraform providers, containing:
-
-- A resource and a data source (`internal/provider/`),
-- Examples (`examples/`) and generated documentation (`docs/`),
-- Miscellaneous meta files.
-
-These files contain boilerplate code that you will need to edit to create your own Terraform provider. Tutorials for creating Terraform providers can be found on the [HashiCorp Developer](https://developer.hashicorp.com/terraform/tutorials/providers-plugin-framework) platform. _Terraform Plugin Framework specific guides are titled accordingly._
-
-Please see the [GitHub template repository documentation](https://help.github.com/en/github/creating-cloning-and-archiving-repositories/creating-a-repository-from-a-template) for how to create a new repository from this template on GitHub.
-
-Once you've written your provider, you'll want to [publish it on the Terraform Registry](https://developer.hashicorp.com/terraform/registry/providers/publishing) so that others can use it.
+This is a Terraform provider for Edgio API. This provider is based on Terraform Plugin Framework, for more information you can check the [Terraform Plugin Framework](https://github.com/hashicorp/terraform-plugin-framework)
 
 ## Requirements
 
@@ -29,36 +17,37 @@ Once you've written your provider, you'll want to [publish it on the Terraform R
 go install
 ```
 
-## Adding Dependencies
+## Examples
 
-This provider uses [Go modules](https://github.com/golang/go/wiki/Modules).
-Please see the Go documentation for the most up to date information about using Go modules.
+There are examples in the `examples` directory. To run an example, navigate to the example directory and run `terraform init` and `terraform apply`.
 
-To add a new dependency `github.com/author/dependency` to your Terraform provider:
+## Debugging
 
-```shell
-go get github.com/author/dependency
-go mod tidy
-```
-
-Then commit the changes to `go.mod` and `go.sum`.
-
-## Using the provider
-
-Fill this in for each provider
-
-## Developing the Provider
-
-If you wish to work on the provider, you'll first need [Go](http://www.golang.org) installed on your machine (see [Requirements](#requirements) above).
-
-To compile the provider, run `go install`. This will build the provider and put the provider binary in the `$GOPATH/bin` directory.
-
-To generate or update documentation, run `go generate`.
-
-In order to run the full suite of Acceptance tests, run `make testacc`.
-
-*Note:* Acceptance tests create real resources, and often cost money to run.
+To enable terraform debugging you need Dlv:
 
 ```shell
-make testacc
+go get github.com/go-delve/delve/cmd/dlv
 ```
+
+Before runninf Dlv, you need to build the provider with the following command:
+
+```shell
+go build -gcflags "all=-N -l" -o terraform-provider-edgio
+```
+
+Then you can run the following command to debug the provider:
+
+```shell
+dlv exec --headless --listen=:2345 --api-version=2 ./terraform-provider-edgio
+```
+
+Once Dlv is running, attach to the process with your IDE, once Dlv detects the connection, it will output the following message:
+
+```shell
+Provider started. To attach Terraform CLI, set the TF_REATTACH_PROVIDERS environment variable with the following:
+
+        TF_REATTACH_PROVIDERS='{"hashicorp.com/edu/edgio":{"Protocol":"grpc","ProtocolVersion":6,"Pid":62355,"Test":true,"Addr":{"Network":"unix","String":"/var/folders/hc/mcfd08xn3k55gxznww512l_80000gn/T/plugin4155344464"}}}'
+```
+
+Copy the `TF_REATTACH_PROVIDERS` environment variable and set it in your terminal, then you can run the terraform command you want to debug.
+
