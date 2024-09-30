@@ -6,12 +6,17 @@ terraform {
   }
 }
 
+variable "client_id" { type = string }
+variable "client_secret" {  type = string }
+variable "environment_id" { type = string }
+
 provider "edgio" {
-  client_id     = "f8c1d12a-ee43-44d9-816a-bd73b7441ca5"
-  client_secret = "veBWKIS5vY9akbw5UaqksF7Et29lQnDo"
+  client_id     = var.client_id
+  client_secret = var.client_secret
 }
+
 resource "edgio_cdn_configuration" "my_cdn_configuration" {
-  environment_id = "90a14b8b-3ba6-430f-909b-59715547e448"
+  environment_id = var.environment_id
   rules = <<EOF
 [
   {
