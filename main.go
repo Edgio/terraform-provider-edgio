@@ -26,7 +26,7 @@ func main() {
 	s, _ := os.Getwd()
 	log.Println("Current directory: ", s)
 
-	flag.BoolVar(&debugVar, "debug", false, "set to true to run the provider with support for debuggers like delve")
+	flag.BoolVar(&debugVar, "debug", true, "set to true to run the provider with support for debuggers like delve")
 	flag.Parse()
 
 	opts := providerserver.ServeOpts{

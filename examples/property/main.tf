@@ -10,17 +10,11 @@ provider "edgio" {
   client_id     = "f8c1d12a-ee43-44d9-816a-bd73b7441ca5"
   client_secret = "veBWKIS5vY9akbw5UaqksF7Et29lQnDo"
 }
-
-data "edgio_property" "my_specific_property" {
-   property_id = "23e376ec-5aab-4a46-84d4-a15571b3c994"
+resource "edgio_property" "my_property" {
+  organization_id = "6b1e0c15-d302-4775-b731-efaa22b96617"
+  slug = "sprint-demo-property-changed"
 }
 
-output "property_details" {
-  value = {
-    id: data.edgio_property.my_specific_property.id,
-    organization_id: data.edgio_property.my_specific_property.organization_id,
-    slug: data.edgio_property.my_specific_property.slug,
-    created_at: data.edgio_property.my_specific_property.created_at,
-    updated_at: data.edgio_property.my_specific_property.updated_at,  
-  }
+output "added_property" {
+  value = edgio_property.my_property
 }

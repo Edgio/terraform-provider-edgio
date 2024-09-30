@@ -6,6 +6,8 @@ import (
 	"terraform-provider-edgio/internal/edgio_provider/data_sources"
 	"terraform-provider-edgio/internal/edgio_provider/resources"
 
+	"github.com/hashicorp/terraform-plugin-framework/function"
+
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
@@ -22,6 +24,12 @@ type Provider struct {
 func New() provider.Provider {
 	return &Provider{}
 }
+
+// Ensure the implementation satisfies the expected interfaces.
+var (
+	_ provider.Provider              = &Provider{}
+	_ provider.ProviderWithFunctions = &Provider{}
+)
 
 // Metadata returns the provider's metadata.
 func (p *Provider) Metadata(ctx context.Context, request provider.MetadataRequest, response *provider.MetadataResponse) {
@@ -47,7 +55,7 @@ func (p *Provider) Configure(ctx context.Context, request provider.ConfigureRequ
 		config.ClientID.ValueString(),
 		config.ClientSecret.ValueString(),
 		"https://id.edgio.app/connect/token",
-		"https://edgioapis.com/accounts/v0.1",
+		"https://edgioapis.com",
 	)
 
 	p.client = client
@@ -58,13 +66,32 @@ func (p *Provider) DataSources(_ context.Context) []func() datasource.DataSource
 		func() datasource.DataSource {
 			return data_sources.NewPropertiesDataSource(p.client)
 		},
+		func() datasource.DataSource {
+			return data_sources.NewEnvironmentsDataSource(p.client)
+		},
+		func() datasource.DataSource {
+			return data_sources.NewTlsCertsDataSource(p.client)
+		},
 	}
+
 }
 
 func (p *Provider) Resources(ctx context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
 		func() resource.Resource {
 			return resources.NewPropertyResource(p.client)
+		},
+		func() resource.Resource {
+			return resources.NewEnvironmentResource(p.client)
+		},
+		func() resource.Resource {
+			return resources.NewPurgeCacheResource(p.client)
+		},
+		func() resource.Resource {
+			return resources.NewTLSCertsResource(p.client)
+		},
+		func() resource.Resource {
+			return resources.NewCDNConfigurationResource(p.client)
 		},
 	}
 }
@@ -80,6 +107,14 @@ func (p *Provider) Schema(_ context.Context, _ provider.SchemaRequest, resp *pro
 				MarkdownDescription: "Client Secret for OAuth2 authentication.",
 				Required:            true,
 			},
+		},
+	}
+}
+
+func (p *Provider) Functions(_ context.Context) []func() function.Function {
+	return []func() function.Function{
+		func() function.Function {
+			return NewComputeTaxFunction()
 		},
 	}
 }
