@@ -16,10 +16,10 @@ import (
 var _ resource.Resource = &EnvironmentResource{}
 
 type EnvironmentResource struct {
-	client *edgio_api.EdgioClient
+	client edgio_api.EdgioClientInterface
 }
 
-func NewEnvironmentResource(client *edgio_api.EdgioClient) *EnvironmentResource {
+func NewEnvironmentResource(client edgio_api.EdgioClientInterface) *EnvironmentResource {
 	return &EnvironmentResource{
 		client: client,
 	}

@@ -18,3 +18,11 @@ type TLSCertModel struct {
 	CreatedAt        types.String `tfsdk:"created_at"`
 	UpdatedAt        types.String `tfsdk:"updated_at"`
 }
+
+type TLSCertsModel struct {
+	EnvironmentID types.String   `tfsdk:"environment_id"`
+	Page          types.Int32    `tfsdk:"page"`
+	PageSize      types.Int32    `tfsdk:"page_size"`
+	ItemCount     types.Int32    `tfsdk:"item_count"`
+	Certificates  []TLSCertModel `tfsdk:"certificates"`
+}

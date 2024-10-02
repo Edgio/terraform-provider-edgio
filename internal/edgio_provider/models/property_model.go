@@ -11,3 +11,9 @@ type PropertyModel struct {
 	CreatedAt      types.String `tfsdk:"created_at"`
 	UpdatedAt      types.String `tfsdk:"updated_at"`
 }
+
+type PropertiesModel struct {
+	OrganizationID types.String    `tfsdk:"organization_id"`
+	ItemCount      types.Int32     `tfsdk:"item_count"`
+	Properties     []PropertyModel `tfsdk:"properties"`
+}

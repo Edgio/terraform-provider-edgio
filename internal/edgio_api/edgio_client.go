@@ -3,12 +3,7 @@ package edgio_api
 import (
 	"context"
 	"fmt"
-	"net/http"
-	"terraform-provider-edgio/internal/edgio_api/dtos/configuration"
-	"terraform-provider-edgio/internal/edgio_api/dtos/environments"
-	"terraform-provider-edgio/internal/edgio_api/dtos/properties"
-	"terraform-provider-edgio/internal/edgio_api/dtos/purge"
-	"terraform-provider-edgio/internal/edgio_api/dtos/tls"
+	"terraform-provider-edgio/internal/edgio_api/dtos"
 	"time"
 
 	"github.com/go-resty/resty/v2"
@@ -31,7 +26,6 @@ type TokenCache struct {
 	Expiry      time.Time
 }
 
-// EdgioClient manages communication with the Edgio API.
 type EdgioClient struct {
 	client       *resty.Client
 	clientID     string
@@ -41,7 +35,6 @@ type EdgioClient struct {
 	tokenCache   map[string]TokenCache
 }
 
-// NewEdgioClient creates a new EdgioClient instance with necessary details.
 func NewEdgioClient(clientID, clientSecret, tokenURL, apiURL string) *EdgioClient {
 	client := resty.New().
 		SetTimeout(30 * time.Second).
@@ -79,7 +72,7 @@ func (c *EdgioClient) getToken(scope string) (string, error) {
 		return "", fmt.Errorf("failed to request token: %w", err)
 	}
 
-	if resp.StatusCode() != 200 {
+	if resp.IsError() {
 		return "", fmt.Errorf("unexpected status code for getToken: %d", resp.StatusCode())
 	}
 
@@ -91,7 +84,7 @@ func (c *EdgioClient) getToken(scope string) (string, error) {
 	return tokenResp.AccessToken, nil
 }
 
-func (c *EdgioClient) GetProperty(ctx context.Context, propertyID string) (*properties.Property, error) {
+func (c *EdgioClient) GetProperty(ctx context.Context, propertyID string) (*dtos.Property, error) {
 	token, err := c.getToken("app.accounts")
 	if err != nil {
 		return nil, fmt.Errorf("failed to get token: %w", err)
@@ -99,7 +92,7 @@ func (c *EdgioClient) GetProperty(ctx context.Context, propertyID string) (*prop
 
 	url := fmt.Sprintf("%s/accounts/v0.1/properties/%s", c.apiURL, propertyID)
 
-	var property properties.Property
+	var property dtos.Property
 	resp, err := c.client.R().
 		SetContext(ctx).
 		SetAuthToken(token).
@@ -110,14 +103,14 @@ func (c *EdgioClient) GetProperty(ctx context.Context, propertyID string) (*prop
 		return nil, fmt.Errorf("failed to send request: %w", err)
 	}
 
-	if resp.StatusCode() != 200 {
+	if resp.IsError() {
 		return nil, fmt.Errorf("unexpected status code for getSpecificProperty: %d, %s", resp.StatusCode(), resp.Request.URL)
 	}
 
 	return &property, nil
 }
 
-func (c *EdgioClient) GetProperties(page int, pageSize int, organizationID string) (*properties.Properties, error) {
+func (c *EdgioClient) GetProperties(page int, pageSize int, organizationID string) (*dtos.Properties, error) {
 	token, err := c.getToken("app.accounts")
 	if err != nil {
 		return nil, fmt.Errorf("failed to get token: %w", err)
@@ -125,7 +118,7 @@ func (c *EdgioClient) GetProperties(page int, pageSize int, organizationID strin
 
 	url := fmt.Sprintf("%s/accounts/v0.1/properties", c.apiURL)
 
-	var propertiesResp properties.Properties
+	var propertiesResp dtos.Properties
 	resp, err := c.client.R().
 		SetAuthToken(token).
 		SetQueryParams(map[string]string{
@@ -140,14 +133,14 @@ func (c *EdgioClient) GetProperties(page int, pageSize int, organizationID strin
 		return nil, fmt.Errorf("failed to send request: %w", err)
 	}
 
-	if resp.StatusCode() != 200 {
+	if resp.IsError() {
 		return nil, fmt.Errorf("unexpected status code for getProperties: %d", resp.StatusCode())
 	}
 
 	return &propertiesResp, nil
 }
 
-func (c *EdgioClient) CreateProperty(ctx context.Context, organizationID, slug string) (*properties.Property, error) {
+func (c *EdgioClient) CreateProperty(ctx context.Context, organizationID, slug string) (*dtos.Property, error) {
 	token, err := c.getToken("app.accounts")
 	if err != nil {
 		return nil, fmt.Errorf("failed to get token: %w", err)
@@ -155,7 +148,7 @@ func (c *EdgioClient) CreateProperty(ctx context.Context, organizationID, slug s
 
 	url := fmt.Sprintf("%s/accounts/v0.1/properties", c.apiURL)
 
-	var createdProperty properties.Property
+	var createdProperty dtos.Property
 	resp, err := c.client.R().
 		SetContext(ctx).
 		SetAuthToken(token).
@@ -171,7 +164,7 @@ func (c *EdgioClient) CreateProperty(ctx context.Context, organizationID, slug s
 		return nil, fmt.Errorf("failed to send request: %w", err)
 	}
 
-	if resp.StatusCode() != 201 {
+	if resp.IsError() {
 		return nil, fmt.Errorf("unexpected status code for createProperty: %d, response: %s", resp.StatusCode(), resp.String())
 	}
 
@@ -194,14 +187,14 @@ func (c *EdgioClient) DeleteProperty(propertyID string) error {
 		return fmt.Errorf("error sending DELETE request: %w", err)
 	}
 
-	if resp.StatusCode() != http.StatusOK {
+	if resp.IsError() {
 		return fmt.Errorf("error deleting property: status code %d", resp.StatusCode())
 	}
 
 	return nil
 }
 
-func (c *EdgioClient) UpdateProperty(ctx context.Context, propertyID string, slug string) (*properties.Property, error) {
+func (c *EdgioClient) UpdateProperty(ctx context.Context, propertyID string, slug string) (*dtos.Property, error) {
 	token, err := c.getToken("app.accounts")
 	if err != nil {
 		return nil, fmt.Errorf("failed to get token: %w", err)
@@ -213,7 +206,7 @@ func (c *EdgioClient) UpdateProperty(ctx context.Context, propertyID string, slu
 		"slug": slug,
 	}
 
-	var updatedProperty properties.Property
+	var updatedProperty dtos.Property
 	resp, err := c.client.R().
 		SetContext(ctx).
 		SetAuthToken(token).
@@ -225,14 +218,14 @@ func (c *EdgioClient) UpdateProperty(ctx context.Context, propertyID string, slu
 		return nil, fmt.Errorf("failed to send request: %w", err)
 	}
 
-	if resp.StatusCode() != http.StatusOK {
+	if resp.IsError() {
 		return nil, fmt.Errorf("unexpected status code for updateProperty: %d", resp.StatusCode())
 	}
 
 	return &updatedProperty, nil
 }
 
-func (c *EdgioClient) GetEnvironments(page, pageSize int, propertyID string) (*environments.EnvironmentsResponse, error) {
+func (c *EdgioClient) GetEnvironments(page, pageSize int, propertyID string) (*dtos.EnvironmentsResponse, error) {
 	token, err := c.getToken("app.accounts")
 	if err != nil {
 		return nil, fmt.Errorf("failed to get token: %w", err)
@@ -247,7 +240,7 @@ func (c *EdgioClient) GetEnvironments(page, pageSize int, propertyID string) (*e
 			"page_size":   fmt.Sprintf("%d", pageSize),
 			"property_id": propertyID,
 		}).
-		SetResult(&environments.EnvironmentsResponse{}).
+		SetResult(&dtos.EnvironmentsResponse{}).
 		Get(url)
 
 	if err != nil {
@@ -258,10 +251,10 @@ func (c *EdgioClient) GetEnvironments(page, pageSize int, propertyID string) (*e
 		return nil, fmt.Errorf("error response: %s", resp.String())
 	}
 
-	return resp.Result().(*environments.EnvironmentsResponse), nil
+	return resp.Result().(*dtos.EnvironmentsResponse), nil
 }
 
-func (c *EdgioClient) GetEnvironment(environmentID string) (*environments.Environment, error) {
+func (c *EdgioClient) GetEnvironment(environmentID string) (*dtos.Environment, error) {
 	token, err := c.getToken("app.accounts")
 	if err != nil {
 		return nil, fmt.Errorf("failed to get token: %w", err)
@@ -274,7 +267,7 @@ func (c *EdgioClient) GetEnvironment(environmentID string) (*environments.Enviro
 			"environment_id": environmentID,
 		}).
 		SetAuthToken(token).
-		SetResult(&environments.Environment{}).
+		SetResult(&dtos.Environment{}).
 		Get(url)
 
 	if err != nil {
@@ -285,10 +278,10 @@ func (c *EdgioClient) GetEnvironment(environmentID string) (*environments.Enviro
 		return nil, fmt.Errorf("error response: %s", resp.String())
 	}
 
-	return resp.Result().(*environments.Environment), nil
+	return resp.Result().(*dtos.Environment), nil
 }
 
-func (c *EdgioClient) CreateEnvironment(propertyID, name string, canMembersDeploy, onlyMaintainersCanDeploy, httpRequestLogging bool) (*environments.Environment, error) {
+func (c *EdgioClient) CreateEnvironment(propertyID, name string, canMembersDeploy, onlyMaintainersCanDeploy, httpRequestLogging bool) (*dtos.Environment, error) {
 	token, err := c.getToken("app.accounts")
 	if err != nil {
 		return nil, fmt.Errorf("failed to get token: %w", err)
@@ -307,7 +300,7 @@ func (c *EdgioClient) CreateEnvironment(propertyID, name string, canMembersDeplo
 	resp, err := c.client.R().
 		SetBody(body).
 		SetAuthToken(token).
-		SetResult(&environments.Environment{}).
+		SetResult(&dtos.Environment{}).
 		Post(url)
 
 	if err != nil {
@@ -318,10 +311,10 @@ func (c *EdgioClient) CreateEnvironment(propertyID, name string, canMembersDeplo
 		return nil, fmt.Errorf("error response: %s", resp.String())
 	}
 
-	return resp.Result().(*environments.Environment), nil
+	return resp.Result().(*dtos.Environment), nil
 }
 
-func (c *EdgioClient) UpdateEnvironment(environmentID, name string, canMembersDeploy, httpRequestLogging, preserveCache bool) (*environments.Environment, error) {
+func (c *EdgioClient) UpdateEnvironment(environmentID, name string, canMembersDeploy, httpRequestLogging, preserveCache bool) (*dtos.Environment, error) {
 	token, err := c.getToken("app.accounts")
 	if err != nil {
 		return nil, fmt.Errorf("failed to get token: %w", err)
@@ -342,7 +335,7 @@ func (c *EdgioClient) UpdateEnvironment(environmentID, name string, canMembersDe
 		}).
 		SetBody(body).
 		SetAuthToken(token).
-		SetResult(&environments.Environment{}).
+		SetResult(&dtos.Environment{}).
 		Patch(url)
 
 	if err != nil {
@@ -353,7 +346,7 @@ func (c *EdgioClient) UpdateEnvironment(environmentID, name string, canMembersDe
 		return nil, fmt.Errorf("error response: %s", resp.String())
 	}
 
-	return resp.Result().(*environments.Environment), nil
+	return resp.Result().(*dtos.Environment), nil
 }
 
 func (c *EdgioClient) DeleteEnvironment(environmentID string) error {
@@ -369,7 +362,7 @@ func (c *EdgioClient) DeleteEnvironment(environmentID string) error {
 			"environment_id": environmentID,
 		}).
 		SetAuthToken(token).
-		SetResult(&environments.Environment{}).
+		SetResult(&dtos.Environment{}).
 		Delete(url)
 
 	if err != nil {
@@ -383,14 +376,14 @@ func (c *EdgioClient) DeleteEnvironment(environmentID string) error {
 	return nil
 }
 
-func (c *EdgioClient) PurgeCache(purgeRequest *purge.PurgeRequest) (*purge.PurgeResponse, error) {
+func (c *EdgioClient) PurgeCache(purgeRequest *dtos.PurgeRequest) (*dtos.PurgeResponse, error) {
 	token, err := c.getToken("app.cache.purge")
 	if err != nil {
 		return nil, fmt.Errorf("failed to get token: %w", err)
 	}
 
 	url := fmt.Sprintf("%s/cache/v0.1/purge-requests", c.apiURL)
-	var purgeResponse purge.PurgeResponse
+	var purgeResponse dtos.PurgeResponse
 
 	resp, err := c.client.R().
 		SetAuthToken(token).
@@ -410,14 +403,14 @@ func (c *EdgioClient) PurgeCache(purgeRequest *purge.PurgeRequest) (*purge.Purge
 	return &purgeResponse, nil
 }
 
-func (c *EdgioClient) GetPurgeStatus(requestId string) (*purge.PurgeResponse, error) {
+func (c *EdgioClient) GetPurgeStatus(requestId string) (*dtos.PurgeResponse, error) {
 	token, err := c.getToken("app.cache.purge")
 	if err != nil {
 		return nil, fmt.Errorf("failed to get token: %w", err)
 	}
 
 	url := fmt.Sprintf("%s/cache/v0.1/purge-requests/%s", c.apiURL, requestId)
-	var purgeStatus purge.PurgeResponse
+	var purgeStatus dtos.PurgeResponse
 
 	resp, err := c.client.R().
 		SetAuthToken(token).
@@ -435,7 +428,7 @@ func (c *EdgioClient) GetPurgeStatus(requestId string) (*purge.PurgeResponse, er
 	return &purgeStatus, nil
 }
 
-func (c *EdgioClient) GetTlsCert(tlsCertId string) (*tls.TLSCertResponse, error) {
+func (c *EdgioClient) GetTlsCert(tlsCertId string) (*dtos.TLSCertResponse, error) {
 	token, err := c.getToken("app.config")
 	if err != nil {
 		return nil, fmt.Errorf("failed to get token: %w", err)
@@ -443,7 +436,7 @@ func (c *EdgioClient) GetTlsCert(tlsCertId string) (*tls.TLSCertResponse, error)
 
 	url := fmt.Sprintf("%s/config/v0.1/tls-certs/%s", c.apiURL, tlsCertId)
 
-	var tlsCertResponse tls.TLSCertResponse
+	var tlsCertResponse dtos.TLSCertResponse
 	resp, err := c.client.R().
 		SetAuthToken(token).
 		SetResult(&tlsCertResponse).
@@ -460,14 +453,14 @@ func (c *EdgioClient) GetTlsCert(tlsCertId string) (*tls.TLSCertResponse, error)
 	return &tlsCertResponse, nil
 }
 
-func (c *EdgioClient) UploadTlsCert(req tls.UploadTlsCertRequest) (*tls.TLSCertResponse, error) {
+func (c *EdgioClient) UploadTlsCert(req dtos.UploadTlsCertRequest) (*dtos.TLSCertResponse, error) {
 	token, err := c.getToken("app.config")
 	if err != nil {
 		return nil, fmt.Errorf("failed to get token: %w", err)
 	}
 
 	url := fmt.Sprintf("%s/config/v0.1/tls-certs", c.apiURL)
-	response := &tls.TLSCertResponse{}
+	response := &dtos.TLSCertResponse{}
 
 	resp, err := c.client.R().
 		SetAuthToken(token).
@@ -487,7 +480,7 @@ func (c *EdgioClient) UploadTlsCert(req tls.UploadTlsCertRequest) (*tls.TLSCertR
 	return response, nil
 }
 
-func (c *EdgioClient) GenerateTlsCert(environmentId string) (*tls.TLSCertResponse, error) {
+func (c *EdgioClient) GenerateTlsCert(environmentId string) (*dtos.TLSCertResponse, error) {
 	token, err := c.getToken("app.config")
 	if err != nil {
 		return nil, fmt.Errorf("failed to get token: %w", err)
@@ -497,7 +490,7 @@ func (c *EdgioClient) GenerateTlsCert(environmentId string) (*tls.TLSCertRespons
 	request := map[string]interface{}{
 		"environment_id": environmentId,
 	}
-	response := &tls.TLSCertResponse{}
+	response := &dtos.TLSCertResponse{}
 
 	resp, err := c.client.R().
 		SetAuthToken(token).
@@ -517,7 +510,7 @@ func (c *EdgioClient) GenerateTlsCert(environmentId string) (*tls.TLSCertRespons
 	return response, nil
 }
 
-func (c *EdgioClient) GetTlsCerts(page int, pageSize int, environmentID string) (*tls.TLSCertSResponse, error) {
+func (c *EdgioClient) GetTlsCerts(page int, pageSize int, environmentID string) (*dtos.TLSCertSResponse, error) {
 	token, err := c.getToken("app.config")
 	if err != nil {
 		return nil, fmt.Errorf("failed to get token: %w", err)
@@ -525,7 +518,7 @@ func (c *EdgioClient) GetTlsCerts(page int, pageSize int, environmentID string) 
 
 	url := fmt.Sprintf("%s/config/v0.1/tls-certs", c.apiURL)
 
-	var tlsCertsResponse tls.TLSCertSResponse
+	var tlsCertsResponse dtos.TLSCertSResponse
 	resp, err := c.client.R().
 		SetAuthToken(token).
 		SetQueryParams(map[string]string{
@@ -547,14 +540,14 @@ func (c *EdgioClient) GetTlsCerts(page int, pageSize int, environmentID string) 
 	return &tlsCertsResponse, nil
 }
 
-func (c *EdgioClient) UploadCdnConfiguration(config *configuration.CDNConfiguration) (*configuration.CDNConfiguration, error) {
+func (c *EdgioClient) UploadCdnConfiguration(config *dtos.CDNConfiguration) (*dtos.CDNConfiguration, error) {
 	token, err := c.getToken("app.config")
 	if err != nil {
 		return nil, fmt.Errorf("failed to get token: %w", err)
 	}
 
 	url := fmt.Sprintf("%s/config/v0.1/configs", c.apiURL)
-	var response configuration.CDNConfiguration
+	var response dtos.CDNConfiguration
 
 	resp, err := c.client.R().
 		SetAuthToken(token).
@@ -574,14 +567,14 @@ func (c *EdgioClient) UploadCdnConfiguration(config *configuration.CDNConfigurat
 	return &response, nil
 }
 
-func (c *EdgioClient) GetCDNConfiguration(configID string) (*configuration.CDNConfiguration, error) {
+func (c *EdgioClient) GetCDNConfiguration(configID string) (*dtos.CDNConfiguration, error) {
 	token, err := c.getToken("app.config")
 	if err != nil {
 		return nil, fmt.Errorf("failed to get token: %w", err)
 	}
 
 	url := fmt.Sprintf("https://edgioapis.com/config/v0.1/configs/%s", configID)
-	var response configuration.CDNConfiguration
+	var response dtos.CDNConfiguration
 
 	resp, err := c.client.R().
 		SetAuthToken(token).

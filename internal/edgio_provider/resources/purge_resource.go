@@ -3,7 +3,7 @@ package resources
 import (
 	"context"
 	"terraform-provider-edgio/internal/edgio_api"
-	"terraform-provider-edgio/internal/edgio_api/dtos/purge"
+	"terraform-provider-edgio/internal/edgio_api/dtos"
 	"terraform-provider-edgio/internal/edgio_provider/models"
 	"time"
 
@@ -16,10 +16,10 @@ import (
 var _ resource.Resource = &PurgeCacheResource{}
 
 type PurgeCacheResource struct {
-	client *edgio_api.EdgioClient
+	client edgio_api.EdgioClientInterface
 }
 
-func NewPurgeCacheResource(client *edgio_api.EdgioClient) resource.Resource {
+func NewPurgeCacheResource(client edgio_api.EdgioClientInterface) resource.Resource {
 	return &PurgeCacheResource{
 		client: client,
 	}
@@ -120,7 +120,7 @@ func (r *PurgeCacheResource) Create(ctx context.Context, req resource.CreateRequ
 		return
 	}
 
-	purgeRequest := purge.PurgeRequest{
+	purgeRequest := dtos.PurgeRequest{
 		EnvironmentID: plan.EnvironmentID.ValueString(),
 		PurgeType:     plan.PurgeType.ValueString(),
 		Values:        values,

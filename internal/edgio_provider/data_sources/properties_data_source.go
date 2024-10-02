@@ -14,7 +14,7 @@ import (
 )
 
 type PropertiesDataSource struct {
-	client *edgio_api.EdgioClient
+	client edgio_api.EdgioClientInterface
 }
 
 // Ensure the implementation satisfies the expected interfaces.
@@ -22,7 +22,7 @@ var (
 	_ datasource.DataSource = &PropertiesDataSource{}
 )
 
-func NewPropertiesDataSource(client *edgio_api.EdgioClient) *PropertiesDataSource {
+func NewPropertiesDataSource(client edgio_api.EdgioClientInterface) *PropertiesDataSource {
 	return &PropertiesDataSource{
 		client: client,
 	}
@@ -166,12 +166,6 @@ func (d *PropertiesDataSource) Read(ctx context.Context, req datasource.ReadRequ
 		OrganizationID: types.StringValue(organizationID),
 		ItemCount:      types.Int32Value(int32(properties.TotalItems)),
 		Properties:     []models.PropertyModel{},
-		Links: models.PropertiesLinksModel{
-			First:    models.PropertiesLinkModel{},
-			Next:     models.PropertiesLinkModel{},
-			Previous: models.PropertiesLinkModel{},
-			Last:     models.PropertiesLinkModel{},
-		},
 	}
 
 	for _, property := range properties.Items {
@@ -186,29 +180,6 @@ func (d *PropertiesDataSource) Read(ctx context.Context, req datasource.ReadRequ
 		}
 
 		state.Properties = append(state.Properties, propertyState)
-	}
-
-	state.Links = models.PropertiesLinksModel{
-		First: models.PropertiesLinkModel{
-			Href:        types.StringValue(properties.Links.First.Href),
-			Description: types.StringValue(properties.Links.First.Description),
-			BasePath:    types.StringValue(properties.Links.First.BasePath),
-		},
-		Next: models.PropertiesLinkModel{
-			Href:        types.StringValue(properties.Links.Next.Href),
-			Description: types.StringValue(properties.Links.Next.Description),
-			BasePath:    types.StringValue(properties.Links.Next.BasePath),
-		},
-		Previous: models.PropertiesLinkModel{
-			Href:        types.StringValue(properties.Links.Previous.Href),
-			Description: types.StringValue(properties.Links.Previous.Description),
-			BasePath:    types.StringValue(properties.Links.Previous.BasePath),
-		},
-		Last: models.PropertiesLinkModel{
-			Href:        types.StringValue(properties.Links.Last.Href),
-			Description: types.StringValue(properties.Links.Last.Description),
-			BasePath:    types.StringValue(properties.Links.Last.BasePath),
-		},
 	}
 
 	diags = resp.State.Set(ctx, &state)

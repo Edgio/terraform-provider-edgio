@@ -13,10 +13,10 @@ import (
 )
 
 type CDNConfigurationResource struct {
-	client *edgio_api.EdgioClient
+	client edgio_api.EdgioClientInterface
 }
 
-func NewCDNConfigurationResource(client *edgio_api.EdgioClient) resource.Resource {
+func NewCDNConfigurationResource(client edgio_api.EdgioClientInterface) resource.Resource {
 	return &CDNConfigurationResource{
 		client: client,
 	}
@@ -319,7 +319,7 @@ func (r *CDNConfigurationResource) Create(ctx context.Context, req resource.Crea
 		return
 	}
 
-	cdnConfig := ConvertCdnConfigToNative(&plan)
+	cdnConfig := models.ConvertCdnConfigToNative(&plan)
 
 	cfg, err := r.client.UploadCdnConfiguration(&cdnConfig)
 
@@ -335,7 +335,7 @@ func (r *CDNConfigurationResource) Create(ctx context.Context, req resource.Crea
 		return
 	}
 
-	state := ConvertNativeToCdnConfig(status)
+	state := models.ConvertNativeToCdnConfig(status)
 	state.EnvironmentID = plan.EnvironmentID
 
 	diags = resp.State.Set(ctx, &state)
@@ -358,7 +358,7 @@ func (r *CDNConfigurationResource) Read(ctx context.Context, req resource.ReadRe
 		return
 	}
 
-	state = ConvertNativeToCdnConfig(cdnConfig)
+	state = models.ConvertNativeToCdnConfig(cdnConfig)
 
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
@@ -373,7 +373,7 @@ func (r *CDNConfigurationResource) Update(ctx context.Context, req resource.Upda
 		return
 	}
 
-	cdnConfig := ConvertCdnConfigToNative(&plan)
+	cdnConfig := models.ConvertCdnConfigToNative(&plan)
 
 	cfg, err := r.client.UploadCdnConfiguration(&cdnConfig)
 
@@ -389,7 +389,7 @@ func (r *CDNConfigurationResource) Update(ctx context.Context, req resource.Upda
 		return
 	}
 
-	state := ConvertNativeToCdnConfig(status)
+	state := models.ConvertNativeToCdnConfig(status)
 	state.EnvironmentID = plan.EnvironmentID
 
 	diags = resp.State.Set(ctx, &state)

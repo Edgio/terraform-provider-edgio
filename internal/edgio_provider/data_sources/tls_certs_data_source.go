@@ -13,7 +13,7 @@ import (
 )
 
 type TlsCertsDataSource struct {
-	client *edgio_api.EdgioClient
+	client edgio_api.EdgioClientInterface
 }
 
 // Ensure the implementation satisfies the expected interfaces.
@@ -21,7 +21,7 @@ var (
 	_ datasource.DataSource = &TlsCertsDataSource{}
 )
 
-func NewTlsCertsDataSource(client *edgio_api.EdgioClient) *TlsCertsDataSource {
+func NewTlsCertsDataSource(client edgio_api.EdgioClientInterface) *TlsCertsDataSource {
 	return &TlsCertsDataSource{
 		client: client,
 	}

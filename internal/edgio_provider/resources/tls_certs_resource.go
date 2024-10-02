@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"terraform-provider-edgio/internal/edgio_api"
-	"terraform-provider-edgio/internal/edgio_api/dtos/tls"
+	"terraform-provider-edgio/internal/edgio_api/dtos"
 	"terraform-provider-edgio/internal/edgio_provider/models"
 )
 
@@ -18,10 +18,10 @@ import (
 var _ resource.Resource = &TLSCertsResource{}
 
 type TLSCertsResource struct {
-	client *edgio_api.EdgioClient
+	client edgio_api.EdgioClientInterface
 }
 
-func NewTLSCertsResource(client *edgio_api.EdgioClient) *TLSCertsResource {
+func NewTLSCertsResource(client edgio_api.EdgioClientInterface) *TLSCertsResource {
 	return &TLSCertsResource{
 		client: client,
 	}
@@ -115,7 +115,7 @@ func (r *TLSCertsResource) Create(ctx context.Context, req resource.CreateReques
 		return
 	}
 
-	tlsRes := tls.TLSCertResponse{}
+	tlsRes := dtos.TLSCertResponse{}
 
 	if !primaryCertSet && !intermediateCertSet && !privateKeySet {
 		res, err := r.client.GenerateTlsCert(plan.EnvironmentID.ValueString())
@@ -127,7 +127,7 @@ func (r *TLSCertsResource) Create(ctx context.Context, req resource.CreateReques
 
 		tlsRes = *res
 	} else {
-		res, err := r.client.UploadTlsCert(tls.UploadTlsCertRequest{
+		res, err := r.client.UploadTlsCert(dtos.UploadTlsCertRequest{
 			EnvironmentID:    plan.EnvironmentID.ValueString(),
 			PrimaryCert:      plan.PrimaryCert.ValueString(),
 			IntermediateCert: plan.IntermediateCert.ValueString(),

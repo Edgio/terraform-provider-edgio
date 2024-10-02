@@ -18,3 +18,10 @@ type EnvironmentModel struct {
 	CreatedAt                types.String `tfsdk:"created_at"`
 	UpdatedAt                types.String `tfsdk:"updated_at"`
 }
+
+type EnvironmentsModel struct {
+	Type         types.String       `tfsdk:"type"`
+	Id           types.String       `tfsdk:"id"`
+	TotalItems   types.Int32        `tfsdk:"total_items"`
+	Environments []EnvironmentModel `tfsdk:"items"`
+}

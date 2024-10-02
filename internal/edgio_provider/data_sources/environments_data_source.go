@@ -13,7 +13,7 @@ import (
 )
 
 type EnvironmentsDataSource struct {
-	client *edgio_api.EdgioClient
+	client edgio_api.EdgioClientInterface
 }
 
 // Ensure the implementation satisfies the expected interfaces.
@@ -21,7 +21,7 @@ var (
 	_ datasource.DataSource = &EnvironmentsDataSource{}
 )
 
-func NewEnvironmentsDataSource(client *edgio_api.EdgioClient) *EnvironmentsDataSource {
+func NewEnvironmentsDataSource(client edgio_api.EdgioClientInterface) *EnvironmentsDataSource {
 	return &EnvironmentsDataSource{
 		client: client,
 	}
@@ -41,67 +41,6 @@ func (d *EnvironmentsDataSource) Schema(ctx context.Context, req datasource.Sche
 			"item_count": schema.Int32Attribute{
 				Computed:    true,
 				Description: `The total number of environments.`,
-			},
-			"links": schema.SingleNestedAttribute{
-				Computed: true,
-				Attributes: map[string]schema.Attribute{
-					"first": schema.SingleNestedAttribute{
-						Computed: true,
-						Attributes: map[string]schema.Attribute{
-							"href": schema.StringAttribute{
-								Computed: true,
-							},
-							"description": schema.StringAttribute{
-								Computed: true,
-							},
-							"base_path": schema.StringAttribute{
-								Computed: true,
-							},
-						},
-					},
-					"next": schema.SingleNestedAttribute{
-						Computed: true,
-						Attributes: map[string]schema.Attribute{
-							"href": schema.StringAttribute{
-								Computed: true,
-							},
-							"description": schema.StringAttribute{
-								Computed: true,
-							},
-							"base_path": schema.StringAttribute{
-								Computed: true,
-							},
-						},
-					},
-					"previous": schema.SingleNestedAttribute{
-						Computed: true,
-						Attributes: map[string]schema.Attribute{
-							"href": schema.StringAttribute{
-								Computed: true,
-							},
-							"description": schema.StringAttribute{
-								Computed: true,
-							},
-							"base_path": schema.StringAttribute{
-								Computed: true,
-							},
-						},
-					},
-					"last": schema.SingleNestedAttribute{
-						Computed: true,
-						Attributes: map[string]schema.Attribute{
-							"href": schema.StringAttribute{
-								Computed: true,
-							},
-							"description": schema.StringAttribute{
-								Computed: true,
-							},
-							"base_path": schema.StringAttribute{
-								Computed: true,
-							},
-						},
-					},
-				},
 			},
 			"environments": schema.ListNestedAttribute{
 				Computed: true,
@@ -181,12 +120,6 @@ func (d *EnvironmentsDataSource) Read(ctx context.Context, req datasource.ReadRe
 		Id:           types.StringValue(propertyID),
 		TotalItems:   types.Int32Value(int32(environments.TotalItems)),
 		Environments: []models.EnvironmentModel{},
-		Links: models.EnvironmentsLinksModel{
-			First:    models.EnvironmentsLinkModel{},
-			Next:     models.EnvironmentsLinkModel{},
-			Previous: models.EnvironmentsLinkModel{},
-			Last:     models.EnvironmentsLinkModel{},
-		},
 	}
 
 	for _, environment := range environments.Items {
@@ -206,29 +139,6 @@ func (d *EnvironmentsDataSource) Read(ctx context.Context, req datasource.ReadRe
 		}
 
 		state.Environments = append(state.Environments, envState)
-	}
-
-	state.Links = models.EnvironmentsLinksModel{
-		First: models.EnvironmentsLinkModel{
-			Href:        types.StringValue(environments.Links.First.Href),
-			Description: types.StringValue(environments.Links.First.Description),
-			BasePath:    types.StringValue(environments.Links.First.BasePath),
-		},
-		Next: models.EnvironmentsLinkModel{
-			Href:        types.StringValue(environments.Links.Next.Href),
-			Description: types.StringValue(environments.Links.Next.Description),
-			BasePath:    types.StringValue(environments.Links.Next.BasePath),
-		},
-		Previous: models.EnvironmentsLinkModel{
-			Href:        types.StringValue(environments.Links.Previous.Href),
-			Description: types.StringValue(environments.Links.Previous.Description),
-			BasePath:    types.StringValue(environments.Links.Previous.BasePath),
-		},
-		Last: models.EnvironmentsLinkModel{
-			Href:        types.StringValue(environments.Links.Last.Href),
-			Description: types.StringValue(environments.Links.Last.Description),
-			BasePath:    types.StringValue(environments.Links.Last.BasePath),
-		},
 	}
 
 	diags = resp.State.Set(ctx, &state)

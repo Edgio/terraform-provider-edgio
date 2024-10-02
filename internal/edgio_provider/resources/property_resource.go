@@ -16,10 +16,10 @@ import (
 var _ resource.Resource = &PropertyResource{}
 
 type PropertyResource struct {
-	client *edgio_api.EdgioClient
+	client edgio_api.EdgioClientInterface
 }
 
-func NewPropertyResource(client *edgio_api.EdgioClient) resource.Resource {
+func NewPropertyResource(client edgio_api.EdgioClientInterface) resource.Resource {
 	return &PropertyResource{
 		client: client,
 	}
@@ -36,7 +36,7 @@ func (r *PropertyResource) Schema(_ context.Context, _ resource.SchemaRequest, r
 				Required: true,
 			},
 			"slug": schema.StringAttribute{
-				Optional: true,
+				Required: true,
 			},
 			"id": schema.StringAttribute{
 				Computed: true,
