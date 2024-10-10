@@ -7,9 +7,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"terraform-provider-edgio/internal/edgio_provider/models"
+	"terraform-provider-edgio/internal/edgio_provider/utility"
 )
 
 type CDNConfigurationResource struct {
@@ -39,7 +41,8 @@ func (r *CDNConfigurationResource) Schema(ctx context.Context, req resource.Sche
 			"rules": schema.StringAttribute{
 				Required: true,
 				PlanModifiers: []planmodifier.String{
-					NormalizeJsonPlanModifier{},
+					stringplanmodifier.UseStateForUnknown(),
+					JSONEqualityModifier{},
 				},
 			},
 			"origins": schema.ListNestedAttribute{
@@ -319,8 +322,7 @@ func (r *CDNConfigurationResource) Create(ctx context.Context, req resource.Crea
 		return
 	}
 
-	cdnConfig := models.ConvertCdnConfigToNative(&plan)
-
+	cdnConfig := utility.ConvertCdnConfigToNative(&plan)
 	cfg, err := r.client.UploadCdnConfiguration(&cdnConfig)
 
 	if err != nil {
@@ -335,9 +337,7 @@ func (r *CDNConfigurationResource) Create(ctx context.Context, req resource.Crea
 		return
 	}
 
-	state := models.ConvertNativeToCdnConfig(status)
-	state.EnvironmentID = plan.EnvironmentID
-
+	state := utility.ConvertNativeToCdnConfig(status)
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 }
@@ -358,7 +358,7 @@ func (r *CDNConfigurationResource) Read(ctx context.Context, req resource.ReadRe
 		return
 	}
 
-	state = models.ConvertNativeToCdnConfig(cdnConfig)
+	state = utility.ConvertNativeToCdnConfig(cdnConfig)
 
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
@@ -373,7 +373,7 @@ func (r *CDNConfigurationResource) Update(ctx context.Context, req resource.Upda
 		return
 	}
 
-	cdnConfig := models.ConvertCdnConfigToNative(&plan)
+	cdnConfig := utility.ConvertCdnConfigToNative(&plan)
 
 	cfg, err := r.client.UploadCdnConfiguration(&cdnConfig)
 
@@ -389,13 +389,11 @@ func (r *CDNConfigurationResource) Update(ctx context.Context, req resource.Upda
 		return
 	}
 
-	state := models.ConvertNativeToCdnConfig(status)
-	state.EnvironmentID = plan.EnvironmentID
-
+	state := utility.ConvertNativeToCdnConfig(status)
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 }
 
 func (r *CDNConfigurationResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	resp.Diagnostics.AddError("Operation Not Supported", "This resource does not support deletion.")
+	resp.Diagnostics.AddWarning("Operation Not Supported", "This resource does not support deletion.")
 }

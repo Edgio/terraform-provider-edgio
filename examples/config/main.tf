@@ -15,8 +15,16 @@ provider "edgio" {
   client_secret = var.client_secret
 }
 
+resource "edgio_property" "property_name" {
+  
+}
+resource "edgio_environment" "my_environment" {
+  name = "my-environment"
+}
+
 resource "edgio_cdn_configuration" "my_cdn_configuration" {
   environment_id = var.environment_id
+  property_id = edgio_property.property_name.id
   rules = <<EOF
 [
   {

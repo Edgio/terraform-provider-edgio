@@ -5,15 +5,18 @@ import (
 	"fmt"
 	"terraform-provider-edgio/internal/edgio_api"
 	"terraform-provider-edgio/internal/edgio_provider/models"
-	"time"
+	"terraform-provider-edgio/internal/edgio_provider/utility"
 
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
 // Ensure the implementation satisfies the expected interfaces
-var _ resource.Resource = &PropertyResource{}
+var (
+	_ resource.Resource                = &PropertyResource{}
+	_ resource.ResourceWithImportState = &PropertyResource{}
+)
 
 type PropertyResource struct {
 	client edgio_api.EdgioClientInterface
@@ -57,6 +60,10 @@ func (r *PropertyResource) Schema(_ context.Context, _ resource.SchemaRequest, r
 	}
 }
 
+func (r *PropertyResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+}
+
 func (r *PropertyResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var plan models.PropertyModel
 	diags := req.Plan.Get(ctx, &plan)
@@ -74,15 +81,8 @@ func (r *PropertyResource) Create(ctx context.Context, req resource.CreateReques
 		return
 	}
 
-	plan.OrganizationID = types.StringValue(property.OrganizationID)
-	plan.Slug = types.StringValue(property.Slug)
-	plan.Id = types.StringValue(property.Id)
-	plan.IdLink = types.StringValue(property.IdLink)
-	plan.Type = types.StringValue(property.Type)
-	plan.CreatedAt = types.StringValue(property.CreatedAt.Format(time.RFC3339))
-	plan.UpdatedAt = types.StringValue(property.UpdatedAt.Format(time.RFC3339))
-
-	diags = resp.State.Set(ctx, plan)
+	newState := utility.ConvertPropertyToModel(property)
+	diags = resp.State.Set(ctx, newState)
 	resp.Diagnostics.Append(diags...)
 }
 
@@ -102,15 +102,9 @@ func (r *PropertyResource) Read(ctx context.Context, req resource.ReadRequest, r
 		)
 		return
 	}
-	state.OrganizationID = types.StringValue(property.OrganizationID)
-	state.Slug = types.StringValue(property.Slug)
-	state.Id = types.StringValue(property.Id)
-	state.IdLink = types.StringValue(property.IdLink)
-	state.Type = types.StringValue(property.Type)
-	state.CreatedAt = types.StringValue(property.CreatedAt.Format(time.RFC3339))
-	state.UpdatedAt = types.StringValue(property.UpdatedAt.Format(time.RFC3339))
 
-	diags = resp.State.Set(ctx, &state)
+	newState := utility.ConvertPropertyToModel(property)
+	diags = resp.State.Set(ctx, newState)
 	resp.Diagnostics.Append(diags...)
 }
 
@@ -138,15 +132,8 @@ func (r *PropertyResource) Update(ctx context.Context, req resource.UpdateReques
 		return
 	}
 
-	plan.OrganizationID = types.StringValue(updatedProperty.OrganizationID)
-	plan.Slug = types.StringValue(updatedProperty.Slug)
-	plan.Id = types.StringValue(updatedProperty.Id)
-	plan.IdLink = types.StringValue(updatedProperty.IdLink)
-	plan.Type = types.StringValue(updatedProperty.Type)
-	plan.CreatedAt = types.StringValue(updatedProperty.CreatedAt.Format(time.RFC3339))
-	plan.UpdatedAt = types.StringValue(updatedProperty.UpdatedAt.Format(time.RFC3339))
-
-	diags = resp.State.Set(ctx, plan)
+	newState := utility.ConvertPropertyToModel(updatedProperty)
+	diags = resp.State.Set(ctx, newState)
 	resp.Diagnostics.Append(diags...)
 }
 

@@ -2,52 +2,38 @@ package resources
 
 import (
 	"context"
-	"encoding/json"
+	"terraform-provider-edgio/internal/edgio_provider/utility"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-type NormalizeJsonPlanModifier struct{}
+// JSONEqualityModifier is a custom plan modifier that formats JSON strings always the same
+type JSONEqualityModifier struct{}
 
-func (m NormalizeJsonPlanModifier) Description(ctx context.Context) string {
-	return "Normalize JSON values in the plan."
+// Description provides a description of the modifier
+func (m JSONEqualityModifier) Description(ctx context.Context) string {
+	return "Formats JSON strings always the same, ignoring formatting differences"
 }
 
-func (m NormalizeJsonPlanModifier) MarkdownDescription(ctx context.Context) string {
-	return "Normalize JSON values in the plan."
+// MarkdownDescription provides a description of the modifier in markdown format
+func (m JSONEqualityModifier) MarkdownDescription(ctx context.Context) string {
+	return "Formats JSON strings always the same, ignoring formatting differences"
 }
 
-func (m NormalizeJsonPlanModifier) PlanModifyString(ctx context.Context, req planmodifier.StringRequest, resp *planmodifier.StringResponse) {
-	if req.PlanValue.IsNull() || req.PlanValue.IsUnknown() {
+// PlanModifyString is called to modify the planned new state
+func (m JSONEqualityModifier) PlanModifyString(ctx context.Context, req planmodifier.StringRequest, resp *planmodifier.StringResponse) {
+	// If the plan is unknown, we can't make any decisions
+	if req.PlanValue.IsUnknown() {
 		return
 	}
 
-	planValue, diag := req.PlanValue.ToStringValue(ctx)
-	if diag != nil {
-		resp.Diagnostics.Append(diag...)
+	json, error := utility.MinifyJSON(req.PlanValue.ValueString())
+
+	if error != nil {
+		resp.Diagnostics.AddError("Error parsing plan JSON", error.Error())
 		return
 	}
 
-	normalized, err := normalizeJSON(planValue.ValueString())
-	if err != nil {
-		resp.Diagnostics.AddError("failed to normalize JSON value", err.Error())
-		return
-	}
-
-	resp.PlanValue = types.StringValue(normalized)
-}
-
-func normalizeJSON(input string) (string, error) {
-	var raw map[string]interface{}
-	if err := json.Unmarshal([]byte(input), &raw); err != nil {
-		return "", err
-	}
-
-	normalizedBytes, err := json.Marshal(raw)
-	if err != nil {
-		return "", err
-	}
-
-	return string(normalizedBytes), nil
+	resp.PlanValue = types.StringValue(json)
 }

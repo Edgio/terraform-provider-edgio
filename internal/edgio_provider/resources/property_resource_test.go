@@ -53,10 +53,10 @@ func mockAllPropertyMethods(mockClient *edgio_api.MockEdgioClient, methods ...Mo
 	}
 }
 
-func TestPropertyResource_Create(t *testing.T) {
+func TestPropertyResource_Lifecycle(t *testing.T) {
 	mockClient := new(edgio_api.MockEdgioClient)
 
-	mockAllPropertyMethods(mockClient, MockCreate, MockGet, MockDelete)
+	mockAllPropertyMethods(mockClient, MockCreate, MockGet, MockUpdate, MockDelete)
 
 	resource.Test(t, resource.TestCase{
 		ProtoV6ProviderFactories: map[string]func() (tfprotov6.ProviderServer, error){
@@ -70,124 +70,34 @@ func TestPropertyResource_Create(t *testing.T) {
 					client_secret = "mock-client-secret"
 				}
 
-				resource "edgio_property" "test" {
-					organization_id = "org-123"
-					slug            = "example-slug"
-				}`,
-				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("edgio_property.test", "organization_id", "org-123"),
-					resource.TestCheckResourceAttr("edgio_property.test", "slug", "example-slug"),
-				),
-			},
-		},
-	})
-
-	mockClient.AssertExpectations(t)
-}
-
-func TestPropertyResource_Read(t *testing.T) {
-	mockClient := new(edgio_api.MockEdgioClient)
-
-	mockAllPropertyMethods(mockClient, MockGet, MockCreate, MockDelete)
-
-	resource.Test(t, resource.TestCase{
-		ProtoV6ProviderFactories: map[string]func() (tfprotov6.ProviderServer, error){
-			"edgio": providerserver.NewProtocol6WithError(edgio_provider.NewMockedProvider(mockClient)),
-		},
-		Steps: []resource.TestStep{
-			{
-				Config: `
-				provider "edgio" {
-					client_id     = "ignore_api_mocked"
-					client_secret = "ignore_api_mocked"
-				}
-
-				resource "edgio_property" "test" {
-					organization_id = "org-123"
-					slug            = "example-slug"
-				}`,
-				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("edgio_property.test", "organization_id", "org-123"),
-					resource.TestCheckResourceAttr("edgio_property.test", "slug", "example-slug"),
-				),
-			},
-		},
-	})
-
-	mockClient.AssertExpectations(t)
-}
-
-func TestPropertyResource_Update(t *testing.T) {
-	mockClient := new(edgio_api.MockEdgioClient)
-
-	mockAllPropertyMethods(mockClient, MockCreate, MockGet, MockUpdate, MockDelete)
-
-	resource.Test(t, resource.TestCase{
-		ProtoV6ProviderFactories: map[string]func() (tfprotov6.ProviderServer, error){
-			"edgio": providerserver.NewProtocol6WithError(edgio_provider.NewMockedProvider(mockClient)),
-		},
-		Steps: []resource.TestStep{
-			{
-				Config: `
-				provider "edgio" {
-					client_id     = "ignore_api_mocked"
-					client_secret = "ignore_api_mocked"
-				}
-
-				resource "edgio_property" "test" {
-					organization_id = "org-123"
-					slug            = "example-slug"
-				}`,
+                resource "edgio_property" "test" {
+                    organization_id = "org-123"
+                    slug            = "example-slug"
+                }`,
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("edgio_property.test", "organization_id", "org-123"),
 					resource.TestCheckResourceAttr("edgio_property.test", "slug", "example-slug"),
 				),
 			},
 			{
+				ResourceName:      "edgio_property.test",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
 				Config: `
 				provider "edgio" {
-					client_id     = "ignore_api_mocked"
-					client_secret = "ignore_api_mocked"
+					client_id     = "mock-client-id"
+					client_secret = "mock-client-secret"
 				}
 
-				resource "edgio_property" "test" {
-					organization_id = "org-123"
-					slug            = "new-slug"
-				}`,
+                resource "edgio_property" "test" {
+                    organization_id = "org-123"
+                    slug            = "new-slug"
+                }`,
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("edgio_property.test", "organization_id", "org-123"),
 					resource.TestCheckResourceAttr("edgio_property.test", "slug", "new-slug"),
-				),
-			},
-		},
-	})
-
-	mockClient.AssertExpectations(t)
-}
-
-func TestPropertyResource_Delete(t *testing.T) {
-	mockClient := new(edgio_api.MockEdgioClient)
-
-	mockAllPropertyMethods(mockClient, MockGet, MockDelete, MockCreate)
-
-	resource.Test(t, resource.TestCase{
-		ProtoV6ProviderFactories: map[string]func() (tfprotov6.ProviderServer, error){
-			"edgio": providerserver.NewProtocol6WithError(edgio_provider.NewMockedProvider(mockClient)),
-		},
-		Steps: []resource.TestStep{
-			{
-				Config: `
-				provider "edgio" {
-					client_id     = "ignore_api_mocked"
-					client_secret = "ignore_api_mocked"
-				}
-
-				resource "edgio_property" "test" {
-					organization_id = "org-123"
-					slug            = "example-slug"
-				}`,
-				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckNoResourceAttr("edgio_property.test", "property-123"),
 				),
 			},
 		},

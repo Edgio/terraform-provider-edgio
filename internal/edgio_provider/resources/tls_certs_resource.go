@@ -4,14 +4,16 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"terraform-provider-edgio/internal/edgio_api"
 	"terraform-provider-edgio/internal/edgio_api/dtos"
 	"terraform-provider-edgio/internal/edgio_provider/models"
+	"terraform-provider-edgio/internal/edgio_provider/utility"
 )
 
 // Ensure the implementation satisfies the resource.Resource interface
@@ -41,14 +43,20 @@ func (r *TLSCertsResource) Schema(_ context.Context, _ resource.SchemaRequest, r
 			"primary_cert": schema.StringAttribute{
 				Optional:    true,
 				Description: "Your TLS certificate. We require this certificate to be issued by a Certificate Authority",
+				Computed:    true,
 			},
 			"intermediate_cert": schema.StringAttribute{
 				Optional:    true,
 				Description: "The intermediate certificates (IC) used by the CA, including the CA’s signing certificate.",
+				Computed:    true,
 			},
 			"private_key": schema.StringAttribute{
 				Optional:    true,
 				Description: "The private key that was generated with the CSR.",
+				Sensitive:   true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"id": schema.StringAttribute{
 				Computed:    true,
@@ -103,11 +111,9 @@ func (r *TLSCertsResource) Create(ctx context.Context, req resource.CreateReques
 		return
 	}
 
-	primaryCertSet := !plan.PrimaryCert.IsNull()
-	intermediateCertSet := !plan.IntermediateCert.IsNull()
-	privateKeySet := !plan.PrivateKey.IsNull()
+	generate := plan.PrimaryCert.ValueString() == "" && plan.IntermediateCert.ValueString() == "" && plan.PrivateKey.ValueString() == ""
 
-	if (primaryCertSet || intermediateCertSet || privateKeySet) && !(primaryCertSet && intermediateCertSet && privateKeySet) {
+	if !generate && (plan.PrimaryCert.ValueString() == "" && plan.IntermediateCert.ValueString() == "" && plan.PrivateKey.ValueString() == "") {
 		resp.Diagnostics.AddError(
 			"Invalid Certificate Input",
 			"If you provide one of 'primary_cert', 'intermediate_cert', or 'private_key', you must provide all three.",
@@ -117,7 +123,7 @@ func (r *TLSCertsResource) Create(ctx context.Context, req resource.CreateReques
 
 	tlsRes := dtos.TLSCertResponse{}
 
-	if !primaryCertSet && !intermediateCertSet && !privateKeySet {
+	if generate {
 		res, err := r.client.GenerateTlsCert(plan.EnvironmentID.ValueString())
 
 		if err != nil {
@@ -142,24 +148,9 @@ func (r *TLSCertsResource) Create(ctx context.Context, req resource.CreateReques
 		tlsRes = *res
 	}
 
-	plan = models.TLSCertModel{
-		ID:               types.StringValue(tlsRes.ID),
-		EnvironmentID:    types.StringValue(tlsRes.EnvironmentID),
-		PrimaryCert:      types.StringValue(tlsRes.PrimaryCert),
-		IntermediateCert: types.StringValue(tlsRes.IntermediateCert),
-		Expiration:       types.StringValue(tlsRes.Expiration),
-		Status:           types.StringValue(tlsRes.Status),
-		Generated:        types.BoolValue(tlsRes.Generated),
-		Serial:           types.StringValue(tlsRes.Serial),
-		CommonName:       types.StringValue(tlsRes.CommonName),
-		AlternativeNames: convertToList(tlsRes.AlternativeNames),
-		ActivationError:  types.StringValue(tlsRes.ActivationError),
-		CreatedAt:        types.StringValue(tlsRes.CreatedAt),
-		UpdatedAt:        types.StringValue(tlsRes.UpdatedAt),
-	}
-
-	// Set the state (e.g., after generating or uploading the certificate)
-	diags = resp.State.Set(ctx, &plan)
+	newState := utility.ConvertTlsCertsToModel(&tlsRes)
+	newState.PrivateKey = plan.PrivateKey
+	diags = resp.State.Set(ctx, &newState)
 	resp.Diagnostics.Append(diags...)
 }
 
@@ -177,41 +168,63 @@ func (r *TLSCertsResource) Read(ctx context.Context, req resource.ReadRequest, r
 		return
 	}
 
-	// Update state with the fetched data
-	state = models.TLSCertModel{
-		ID:               types.StringValue(tlsCertResponse.ID),
-		EnvironmentID:    types.StringValue(tlsCertResponse.EnvironmentID),
-		PrimaryCert:      types.StringValue(tlsCertResponse.PrimaryCert),
-		IntermediateCert: types.StringValue(tlsCertResponse.IntermediateCert),
-		Expiration:       types.StringValue(tlsCertResponse.Expiration),
-		Status:           types.StringValue(tlsCertResponse.Status),
-		Generated:        types.BoolValue(tlsCertResponse.Generated),
-		Serial:           types.StringValue(tlsCertResponse.Serial),
-		CommonName:       types.StringValue(tlsCertResponse.CommonName),
-		AlternativeNames: convertToList(tlsCertResponse.AlternativeNames),
-		ActivationError:  types.StringValue(tlsCertResponse.ActivationError),
-		CreatedAt:        types.StringValue(tlsCertResponse.CreatedAt),
-		UpdatedAt:        types.StringValue(tlsCertResponse.UpdatedAt),
-	}
-
-	diags = resp.State.Set(ctx, &state)
+	newState := utility.ConvertTlsCertsToModel(tlsCertResponse)
+	newState.PrivateKey = state.PrivateKey
+	diags = resp.State.Set(ctx, &newState)
 	resp.Diagnostics.Append(diags...)
 }
 
 func (r *TLSCertsResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	resp.Diagnostics.AddError("Error Updating Purge Cache", "Purge Cache cannot be updated")
+	var plan models.TLSCertModel
+	diags := req.Plan.Get(ctx, &plan)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	generate := plan.PrimaryCert.ValueString() == "" && plan.IntermediateCert.ValueString() == "" && plan.PrivateKey.ValueString() == ""
+
+	if !generate && (plan.PrimaryCert.ValueString() == "" || plan.IntermediateCert.ValueString() == "" || plan.PrivateKey.ValueString() == "") {
+		resp.Diagnostics.AddError(
+			"Invalid Certificate Input",
+			"If you provide one of 'primary_cert', 'intermediate_cert', or 'private_key', you must provide all three.",
+		)
+		return
+	}
+
+	tlsRes := dtos.TLSCertResponse{}
+
+	if generate {
+		res, err := r.client.GenerateTlsCert(plan.EnvironmentID.ValueString())
+
+		if err != nil {
+			resp.Diagnostics.AddError("Error Generating TLS Cert", fmt.Sprintf("Error: %s", err.Error()))
+			return
+		}
+
+		tlsRes = *res
+	} else {
+		res, err := r.client.UploadTlsCert(dtos.UploadTlsCertRequest{
+			EnvironmentID:    plan.EnvironmentID.ValueString(),
+			PrimaryCert:      plan.PrimaryCert.ValueString(),
+			IntermediateCert: plan.IntermediateCert.ValueString(),
+			PrivateKey:       plan.PrivateKey.ValueString(),
+		})
+
+		if err != nil {
+			resp.Diagnostics.AddError("Error Uploading TLS Cert", fmt.Sprintf("Error: %s", err.Error()))
+			return
+		}
+
+		tlsRes = *res
+	}
+
+	newState := utility.ConvertTlsCertsToModel(&tlsRes)
+	newState.PrivateKey = plan.PrivateKey
+	diags = resp.State.Set(ctx, &newState)
+	resp.Diagnostics.Append(diags...)
 }
 
 func (r *TLSCertsResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	resp.Diagnostics.AddError("Error Deleting Purge Cache", "Purge Cache cannot be deleted")
-}
-
-func convertToList(slice []string) types.List {
-	elements := make([]attr.Value, len(slice))
-	for i, v := range slice {
-		elements[i] = types.StringValue(v)
-	}
-
-	list, _ := types.ListValue(types.StringType, elements)
-	return list
+	resp.Diagnostics.AddWarning("Error Deleting Tls Cert Cache", "Deleting Tls Cert not supported")
 }

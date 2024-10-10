@@ -18,7 +18,6 @@ type Provider struct {
 	client edgio_api.EdgioClientInterface
 }
 
-// New creates a new instance of the provider.
 func New() provider.Provider {
 	return &Provider{}
 }
@@ -75,7 +74,6 @@ func (p *Provider) DataSources(_ context.Context) []func() datasource.DataSource
 			return data_sources.NewTlsCertsDataSource(p.client)
 		},
 	}
-
 }
 
 func (p *Provider) Resources(ctx context.Context) []func() resource.Resource {
@@ -85,9 +83,6 @@ func (p *Provider) Resources(ctx context.Context) []func() resource.Resource {
 		},
 		func() resource.Resource {
 			return resources.NewEnvironmentResource(p.client)
-		},
-		func() resource.Resource {
-			return resources.NewPurgeCacheResource(p.client)
 		},
 		func() resource.Resource {
 			return resources.NewTLSCertsResource(p.client)
