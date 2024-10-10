@@ -16,7 +16,7 @@ import (
 	"terraform-provider-edgio/internal/edgio_provider/utility"
 )
 
-// Ensure the implementation satisfies the resource.Resource interface
+// Ensure the implementation satisfies the resource.Resource interface.
 var _ resource.Resource = &TLSCertsResource{}
 
 type TLSCertsResource struct {

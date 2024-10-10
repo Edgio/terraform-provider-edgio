@@ -20,6 +20,7 @@ go install
 ## Examples
 
 There are examples in the `examples` directory. To run an example, navigate to the example directory and run `terraform init` and `terraform apply`.
+For more information check Readme.md in the examples directory.
 
 ## Debugging
 

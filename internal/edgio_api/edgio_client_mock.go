@@ -101,5 +101,5 @@ func (m *MockEdgioClient) GetCDNConfiguration(configID string) (*dtos.CDNConfigu
 	return args.Get(0).(*dtos.CDNConfiguration), args.Error(1)
 }
 
-// Ensure MockEdgioClient implements EdgioClientInterface
+// Ensure MockEdgioClient implements EdgioClientInterface.
 var _ EdgioClientInterface = (*MockEdgioClient)(nil)

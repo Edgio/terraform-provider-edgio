@@ -135,9 +135,9 @@ func (d *TlsCertsDataSource) Read(ctx context.Context, req datasource.ReadReques
 
 	state := models.TLSCertsModel{
 		EnvironmentID: types.StringValue(environmentID),
-		Page:          types.Int32Value(int32(page)),
-		PageSize:      types.Int32Value(int32(pageSize)),
-		ItemCount:     types.Int32Value(int32(tlsCertsResponse.TotalItems)),
+		Page:          types.Int32Value(page),
+		PageSize:      types.Int32Value(pageSize),
+		ItemCount:     types.Int32Value(tlsCertsResponse.TotalItems),
 		Certificates:  []models.TLSCertModel{},
 	}
 
