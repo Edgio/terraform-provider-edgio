@@ -66,10 +66,10 @@ func (d *EnvironmentsDataSource) Schema(ctx context.Context, req datasource.Sche
 							Computed:    true,
 							Description: "Indicates if members can deploy to the environment.",
 						},
-						"only_maintainers_can_deploy": schema.BoolAttribute{
-							Computed:    true,
-							Description: "Indicates if only maintainers can deploy to the environment.",
-						},
+						// "only_maintainers_can_deploy": schema.BoolAttribute{
+						// 	Computed:    true,
+						// 	Description: "Indicates if only maintainers can deploy to the environment.",
+						// },
 						"http_request_logging": schema.BoolAttribute{
 							Computed:    true,
 							Description: "Indicates if HTTP request logging is enabled for the environment.",
@@ -124,18 +124,19 @@ func (d *EnvironmentsDataSource) Read(ctx context.Context, req datasource.ReadRe
 
 	for _, environment := range environments.Items {
 		envState := models.EnvironmentModel{
-			Id:                       types.StringValue(environment.Id),
-			PropertyID:               types.StringValue(environment.PropertyID),
-			LegacyAccountNumber:      types.StringValue(environment.LegacyAccountNumber),
-			Name:                     types.StringValue(environment.Name),
-			CanMembersDeploy:         types.BoolValue(environment.CanMembersDeploy),
-			OnlyMaintainersCanDeploy: types.BoolValue(environment.OnlyMaintainersCanDeploy),
-			HttpRequestLogging:       types.BoolValue(environment.HttpRequestLogging),
-			DefaultDomainName:        types.StringValue(environment.DefaultDomainName),
-			PciCompliance:            types.BoolValue(environment.PciCompliance),
-			DnsDomainName:            types.StringValue(environment.DnsDomainName),
-			CreatedAt:                types.StringValue(environment.CreatedAt.Format(time.RFC3339)),
-			UpdatedAt:                types.StringValue(environment.UpdatedAt.Format(time.RFC3339)),
+			Id:                  types.StringValue(environment.Id),
+			PropertyID:          types.StringValue(environment.PropertyID),
+			LegacyAccountNumber: types.StringValue(environment.LegacyAccountNumber),
+			Name:                types.StringValue(environment.Name),
+			CanMembersDeploy:    types.BoolValue(environment.CanMembersDeploy),
+			// uncomment this when the API is updated
+			// OnlyMaintainersCanDeploy: types.BoolValue(environment.OnlyMaintainersCanDeploy),
+			HttpRequestLogging: types.BoolValue(environment.HttpRequestLogging),
+			DefaultDomainName:  types.StringValue(environment.DefaultDomainName),
+			PciCompliance:      types.BoolValue(environment.PciCompliance),
+			DnsDomainName:      types.StringValue(environment.DnsDomainName),
+			CreatedAt:          types.StringValue(environment.CreatedAt.Format(time.RFC3339)),
+			UpdatedAt:          types.StringValue(environment.UpdatedAt.Format(time.RFC3339)),
 		}
 
 		state.Environments = append(state.Environments, envState)

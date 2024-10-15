@@ -134,10 +134,6 @@ func (r *CDNConfigurationResource) Schema(ctx context.Context, req resource.Sche
 						"shields": schema.SingleNestedAttribute{
 							Optional: true,
 							Attributes: map[string]schema.Attribute{
-								"global": schema.StringAttribute{
-									Optional: true,
-									Computed: true,
-								},
 								"apac": schema.StringAttribute{
 									Optional: true,
 									Computed: true,

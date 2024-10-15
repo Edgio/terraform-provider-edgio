@@ -183,7 +183,6 @@ func convertShieldsToNative(shields *models.ShieldsModel) *dtos.Shields {
 	}
 
 	return &dtos.Shields{
-		Global: shields.Global.ValueString(),
 		Apac:   shields.Apac.ValueString(),
 		Emea:   shields.Emea.ValueString(),
 		USWest: shields.USWest.ValueString(),
@@ -197,7 +196,6 @@ func convertNativeToShields(shields *dtos.Shields) *models.ShieldsModel {
 	}
 
 	return &models.ShieldsModel{
-		Global: types.StringValue(shields.Global),
 		Apac:   types.StringValue(shields.Apac),
 		Emea:   types.StringValue(shields.Emea),
 		USWest: types.StringValue(shields.USWest),

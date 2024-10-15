@@ -48,7 +48,6 @@ type LocationModel struct {
 }
 
 type ShieldsModel struct {
-	Global types.String `tfsdk:"global"`
 	Apac   types.String `tfsdk:"apac"`
 	Emea   types.String `tfsdk:"emea"`
 	USWest types.String `tfsdk:"us_west"`

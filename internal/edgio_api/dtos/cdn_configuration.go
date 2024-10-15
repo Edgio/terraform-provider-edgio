@@ -19,10 +19,10 @@ type Origin struct {
 	Hosts               []Host     `json:"hosts"`
 	Balancer            string     `json:"balancer"`
 	OverrideHostHeader  string     `json:"override_host_header"`
-	Shields             *Shields   `json:"shields"`
+	Shields             *Shields   `json:"shields,omitempty"`
 	PciCertifiedShields bool       `json:"pci_certified_shields"`
-	TLSVerify           *TLSVerify `json:"tls_verify"`
-	Retry               *Retry     `json:"retry"`
+	TLSVerify           *TLSVerify `json:"tls_verify,omitempty"`
+	Retry               *Retry     `json:"retry,omitempty"`
 }
 
 type Host struct {
@@ -46,7 +46,6 @@ type Location struct {
 }
 
 type Shields struct {
-	Global string `json:"global"`
 	Apac   string `json:"apac"`
 	Emea   string `json:"emea"`
 	USWest string `json:"us_west"`

@@ -7,6 +7,7 @@ import (
 	"terraform-provider-edgio/internal/edgio_api"
 	"terraform-provider-edgio/internal/edgio_api/dtos"
 	"terraform-provider-edgio/internal/edgio_provider"
+	"terraform-provider-edgio/internal/edgio_provider/utility"
 
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
@@ -14,16 +15,7 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-type MockMethod int
-
-const (
-	MockCreate MockMethod = iota
-	MockGet
-	MockUpdate
-	MockDelete
-)
-
-func mockAllPropertyMethods(mockClient *edgio_api.MockEdgioClient, methods ...MockMethod) {
+func mockAllPropertyMethods(mockClient *edgio_api.MockEdgioClient, methods ...utility.MockMethod) {
 	fixedTime := time.Date(2024, 10, 2, 10, 0, 0, 0, time.UTC)
 	updatedAt := fixedTime
 	property := &dtos.Property{
@@ -38,16 +30,16 @@ func mockAllPropertyMethods(mockClient *edgio_api.MockEdgioClient, methods ...Mo
 
 	for _, method := range methods {
 		switch method {
-		case MockCreate:
+		case utility.MockCreate:
 			mockClient.On("CreateProperty", mock.Anything, "org-123", "example-slug").Return(property, nil)
-		case MockGet:
+		case utility.MockGet:
 			mockClient.On("GetProperty", mock.Anything, "property-123").Return(property, nil)
-		case MockUpdate:
+		case utility.MockUpdate:
 			mockClient.On("UpdateProperty", mock.Anything, "property-123", "new-slug").Run(func(args mock.Arguments) {
 				property.Slug = "new-slug"
 				property.UpdatedAt = time.Now()
 			}).Return(property, nil)
-		case MockDelete:
+		case utility.MockDelete:
 			mockClient.On("DeleteProperty", "property-123").Return(nil)
 		}
 	}
@@ -56,7 +48,7 @@ func mockAllPropertyMethods(mockClient *edgio_api.MockEdgioClient, methods ...Mo
 func TestPropertyResource_Lifecycle(t *testing.T) {
 	mockClient := new(edgio_api.MockEdgioClient)
 
-	mockAllPropertyMethods(mockClient, MockCreate, MockGet, MockUpdate, MockDelete)
+	mockAllPropertyMethods(mockClient, utility.MockCreate, utility.MockGet, utility.MockUpdate, utility.MockDelete)
 
 	resource.Test(t, resource.TestCase{
 		ProtoV6ProviderFactories: map[string]func() (tfprotov6.ProviderServer, error){
