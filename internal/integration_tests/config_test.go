@@ -103,7 +103,7 @@ func getConfigConfig(clientID, clientSecret, organizationID, propertySlug, envNa
 				type: "customer_origin",				
 				hosts: [
 					{
-						scheme: "match",
+						scheme: "https",
 						weight: 100,
 						use_sni: false,
 						balancer: "round_robin",

@@ -12,7 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
-func IntegrationTestEnvironment_Lifecycle(t *testing.T) {
+func TestEnvironment_Lifecycle(t *testing.T) {
 	client_id := os.Getenv("EDGIO_CLIENT_ID")
 	client_secret := os.Getenv("EDGIO_CLIENT_SECRET")
 	organization_id := os.Getenv("EDGIO_ORGANIZATION_ID")

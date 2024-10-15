@@ -13,7 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
-func TestPropertyResource_Lifecycle(t *testing.T) {
+func TestProperty_Lifecycle(t *testing.T) {
 	client_id := os.Getenv("EDGIO_CLIENT_ID")
 	client_secret := os.Getenv("EDGIO_CLIENT_SECRET")
 	organization_id := os.Getenv("EDGIO_ORGANIZATION_ID")
@@ -28,20 +28,20 @@ func TestPropertyResource_Lifecycle(t *testing.T) {
 			{
 				Config: getPropertyConfig(client_id, client_secret, organization_id, slug_name),
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("edgio_property.test", "organization_id", organization_id),
-					resource.TestCheckResourceAttr("edgio_property.test", "slug", slug_name),
+					resource.TestCheckResourceAttr("edgio_property.prop_test", "organization_id", organization_id),
+					resource.TestCheckResourceAttr("edgio_property.prop_test", "slug", slug_name),
 				),
 			},
 			{
-				ResourceName:      "edgio_property.test",
+				ResourceName:      "edgio_property.prop_test",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
 			{
 				Config: getPropertyConfig(client_id, client_secret, organization_id, updated_slug_name),
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("edgio_property.test", "organization_id", organization_id),
-					resource.TestCheckResourceAttr("edgio_property.test", "slug", updated_slug_name),
+					resource.TestCheckResourceAttr("edgio_property.prop_test", "organization_id", organization_id),
+					resource.TestCheckResourceAttr("edgio_property.prop_test", "slug", updated_slug_name),
 				),
 			},
 		},
@@ -55,7 +55,7 @@ func getPropertyConfig(clientID, clientSecret, organizationID, propertySlug stri
 		client_secret = "%s"
 	}
 
-	resource "edgio_property" "prop_env_test" {
+	resource "edgio_property" "prop_test" {
 		organization_id = "%s"
 		slug            = "%s"		
 	}`, clientID, clientSecret, organizationID, propertySlug)

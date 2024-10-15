@@ -47,9 +47,9 @@ func mockAllCDNConfigurationMethods(mockClient *edgio_api.MockEdgioClient, metho
 						SNIHintAndStrictSanCheck: "",
 					},
 				},
-				Balancer:            "round_robin",
-				OverrideHostHeader:  "example.com",
-				PciCertifiedShields: false,
+				Balancer:            utility.PtrString("round_robin"),
+				OverrideHostHeader:  utility.PtrString("example.com"),
+				PciCertifiedShields: utility.PtrBool(false),
 			},
 		},
 		Hostnames: []dtos.Hostname{

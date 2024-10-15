@@ -46,3 +46,26 @@ func RandomString(length int) string {
 	}
 	return sb.String()
 }
+
+// The following are functions that return pointers to primitive types as this
+// seems like a major flaw of go's type system.
+
+// PtrString returns a pointer to a string value.
+func PtrString(s string) *string {
+	return &s
+}
+
+// PtrInt returns a pointer to an int value.
+func PtrInt(i int) *int {
+	return &i
+}
+
+// PtrFloat64 returns a pointer to a float64 value.
+func PtrFloat64(f float64) *float64 {
+	return &f
+}
+
+// PtrBool returns a pointer to a bool value.
+func PtrBool(b bool) *bool {
+	return &b
+}

@@ -17,10 +17,10 @@ type Origin struct {
 	Name                string     `json:"name"`
 	Type                string     `json:"type"`
 	Hosts               []Host     `json:"hosts"`
-	Balancer            string     `json:"balancer"`
-	OverrideHostHeader  string     `json:"override_host_header"`
+	Balancer            *string    `json:"balancer,omitempty"`
+	OverrideHostHeader  *string    `json:"override_host_header,omitempty"`
 	Shields             *Shields   `json:"shields,omitempty"`
-	PciCertifiedShields bool       `json:"pci_certified_shields"`
+	PciCertifiedShields *bool      `json:"pci_certified_shields,omitempty"`
 	TLSVerify           *TLSVerify `json:"tls_verify,omitempty"`
 	Retry               *Retry     `json:"retry,omitempty"`
 }

@@ -14,8 +14,7 @@ provider "edgio" {
 resource "edgio_environment" "my_env" {
   property_id = "aba651c5-4bf5-426d-ad33-cf44b8aac63e"
   name        = "new-env-changed"
-  can_members_deploy = true
-  only_maintainers_can_deploy = false
+  can_members_deploy = true  
   http_request_logging = true
 }
 
