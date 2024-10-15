@@ -37,12 +37,13 @@ func GetTestConfig() string {
 func RandomString(length int) string {
 	var letters = []rune("abcdefghijklmnopqrstuvwxyz")
 
-	// Seed the random number generator
-	rand.Seed(time.Now().UnixNano())
+	// Create a new random source
+	source := rand.NewSource(time.Now().UnixNano())
+	r := rand.New(source)
 
 	var sb strings.Builder
 	for i := 0; i < length; i++ {
-		sb.WriteRune(letters[rand.Intn(len(letters))])
+		sb.WriteRune(letters[r.Intn(len(letters))])
 	}
 	return sb.String()
 }
