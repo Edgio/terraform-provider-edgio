@@ -323,7 +323,7 @@ func (c *EdgioClient) UpdateEnvironment(environmentID, name string, onlyMaintain
 
 	body := map[string]interface{}{
 		"name": name,
-		// as only_maintainers_can_deploy is depricated, but update api is not
+		// as can_members_deploy is depricated, but update api is not
 		// we need to use it to map onlyMaintainersCanDeploy
 		"only_maintainers_can_deploy": onlyMaintainersCanDeploy,
 		"http_request_logging":        httpRequestLogging,

@@ -6,7 +6,6 @@ import (
 )
 
 type EdgioClientInterface interface {
-	// getToken(scope string) (string, error)
 	GetProperty(ctx context.Context, propertyID string) (*dtos.Property, error)
 	GetProperties(page int, pageSize int, organizationID string) (*dtos.Properties, error)
 	CreateProperty(ctx context.Context, organizationID, slug string) (*dtos.Property, error)

@@ -40,7 +40,7 @@ func mockAllEnvironmentMethods(mockClient *edgio_api.MockEdgioClient, methods ..
 		case utility.MockGet:
 			mockClient.On("GetEnvironment", "env-123").Return(environment, nil)
 		case utility.MockUpdate:
-			mockClient.On("UpdateEnvironment", "env-123", "updated-environment", false, false).Run(func(args mock.Arguments) {
+			mockClient.On("UpdateEnvironment", "env-123", "updated-environment", false, false, false).Run(func(args mock.Arguments) {
 				environment.Name = "updated-environment"
 				environment.CanMembersDeploy = false
 				environment.HttpRequestLogging = false
