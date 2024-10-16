@@ -8,7 +8,6 @@ terraform {
 
 variable "client_id" { type = string }
 variable "client_secret" {  type = string }
-variable "environment_id" { type = string }
 
 provider "edgio" {
   client_id     = var.client_id
