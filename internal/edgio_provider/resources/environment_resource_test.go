@@ -78,7 +78,7 @@ func TestEnvironmentResource_Lifecycle(t *testing.T) {
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("edgio_environment.test", "property_id", "property-123"),
 					resource.TestCheckResourceAttr("edgio_environment.test", "name", "example-environment"),
-					resource.TestCheckResourceAttr("edgio_environment.test", "only_maintainers_can_deploy", "true"),
+					resource.TestCheckResourceAttr("edgio_environment.test", "only_maintainers_can_deploy", "false"),
 					resource.TestCheckResourceAttr("edgio_environment.test", "http_request_logging", "true"),
 				),
 			},

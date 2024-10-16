@@ -16,9 +16,8 @@ provider "edgio" {
 }
 
 data "edgio_tls_certs" "my_certs" {
-   environment_id = var.environment_id
-   page = 1
-   page_size = 100
+   environment_id = "enter environment id"
+   item_count = 100
 }
 
 output "all_my_certs" {

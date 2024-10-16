@@ -4,8 +4,8 @@ import (
 	"context"
 	"terraform-provider-edgio/internal/edgio_api"
 	"terraform-provider-edgio/internal/edgio_provider/models"
+	"terraform-provider-edgio/internal/edgio_provider/utility"
 
-	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -38,17 +38,9 @@ func (d *TlsCertsDataSource) Schema(ctx context.Context, req datasource.SchemaRe
 				Required:    true,
 				Description: `The environment ID to filter the TLS certificates.`,
 			},
-			"page": schema.Int32Attribute{
-				Optional:    true,
-				Description: `The page number to fetch.`,
-			},
-			"page_size": schema.Int32Attribute{
-				Optional:    true,
-				Description: `The number of items per page.`,
-			},
 			"item_count": schema.Int32Attribute{
 				Computed:    true,
-				Description: `The total number of TLS certificates.`,
+				Description: `The total number of TLS certificates to load.`,
 			},
 			"certificates": schema.ListNestedAttribute{
 				Computed: true,
@@ -116,18 +108,16 @@ func (d *TlsCertsDataSource) Schema(ctx context.Context, req datasource.SchemaRe
 
 func (d *TlsCertsDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var environmentID string
-	var page int32
-	var pageSize int32
+	var item_count int32
 	diags := req.Config.GetAttribute(ctx, path.Root("environment_id"), &environmentID)
 	resp.Diagnostics.Append(diags...)
-	req.Config.GetAttribute(ctx, path.Root("page"), &page)
-	req.Config.GetAttribute(ctx, path.Root("page_size"), &pageSize)
+	req.Config.GetAttribute(ctx, path.Root("item_count"), &item_count)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	tlsCertsResponse, err := d.client.GetTlsCerts(int(page), int(pageSize), environmentID)
+	tlsCertsResponse, err := d.client.GetTlsCerts(0, int(item_count), environmentID)
 	if err != nil {
 		resp.Diagnostics.AddError("Error reading TLS certificates", err.Error())
 		return
@@ -135,29 +125,12 @@ func (d *TlsCertsDataSource) Read(ctx context.Context, req datasource.ReadReques
 
 	state := models.TLSCertsModel{
 		EnvironmentID: types.StringValue(environmentID),
-		Page:          types.Int32Value(page),
-		PageSize:      types.Int32Value(pageSize),
 		ItemCount:     types.Int32Value(tlsCertsResponse.TotalItems),
 		Certificates:  []models.TLSCertModel{},
 	}
 
 	for _, cert := range tlsCertsResponse.Certificates {
-		certState := models.TLSCertModel{
-			ID:               types.StringValue(cert.ID),
-			EnvironmentID:    types.StringValue(cert.EnvironmentID),
-			PrimaryCert:      types.StringValue(cert.PrimaryCert),
-			IntermediateCert: types.StringValue(cert.IntermediateCert),
-			Expiration:       types.StringValue(cert.Expiration),
-			Status:           types.StringValue(cert.Status),
-			Generated:        types.BoolValue(cert.Generated),
-			Serial:           types.StringValue(cert.Serial),
-			CommonName:       types.StringValue(cert.CommonName),
-			AlternativeNames: convertToListOfString(cert.AlternativeNames),
-			ActivationError:  types.StringValue(cert.ActivationError),
-			CreatedAt:        types.StringValue(cert.CreatedAt),
-			UpdatedAt:        types.StringValue(cert.UpdatedAt),
-		}
-
+		certState := utility.ConvertTlsCertsToModel(&cert)
 		state.Certificates = append(state.Certificates, certState)
 	}
 
@@ -166,18 +139,4 @@ func (d *TlsCertsDataSource) Read(ctx context.Context, req datasource.ReadReques
 	if resp.Diagnostics.HasError() {
 		return
 	}
-}
-
-func convertToListOfString(input []string) types.List {
-	elements := make([]attr.Value, len(input)) // Change to attr.Value
-	for i, v := range input {
-		elements[i] = types.StringValue(v) // This is still correct
-	}
-
-	list, err := types.ListValue(types.StringType, elements)
-	if err != nil {
-		return types.List{}
-	}
-
-	return list
 }

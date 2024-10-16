@@ -21,11 +21,5 @@ data "edgio_properties" "my_properties" {
 }
 
 output "properties" {
-  value = [for property in data.edgio_properties.my_properties.properties : {
-    id: property.id,
-    slug: property.slug,
-    organization_id: property.organization_id,
-    created_at: property.created_at,
-    updated_at: property.updated_at,
-  }]
+  value = data.edgio_properties.my_properties.properties
 }
