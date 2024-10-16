@@ -8,28 +8,109 @@ terraform {
 
 variable "client_id" { type = string }
 variable "client_secret" {  type = string }
-variable "environment_id" { type = string }
+variable "organization_id" { type = string }
 
 provider "edgio" {
   client_id     = var.client_id
   client_secret = var.client_secret
 }
 
-resource "edgio_tls_cert" "my_cert" {
-  environment_id = var.environment_id
-  primary_cert = <<EOF
------BEGIN CERTIFICATE-----\nMIIDDjCCAfagAwIBAgIBAjANBgkqhkiG9w0BAQsFADASMRAwDgYDVQQDDAdSdWJ5\nIENBMB4XDTI0MTAwMTA5NTIxNVoXDTI1MTAwMTA5NTIxNVowUDETMBEGCgmSJomT\n8ixkARkWA29yZzEZMBcGCgmSJomT8ixkARkWCXJ1YnktbGFuZzEeMBwGA1UEAwwV\nbXktdGVzdC10ZXJyYWZvcm0uY29tMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIB\nCgKCAQEA2Li8pnuy9z3IZNoE2KOTP3sojShB9gVqSt176AYPAq3sV9zpNH0WmEZz\n2GAo3ETp6fkGkFyIHVuib8zkzqjQmMQrsMHW616ucEuCTOU72fH4CIOKTSRIkErO\nnpYIN5DeQzOUYAwAqPljrj24pVLY3LeTJbWYGfrI/c4kx7CrRYE8MO89spd498cY\n4qDDkoHIpiFJUeySV2LHsoOsoxy5cxGgdsD/LBnAaRLlLHjrZMXHo/E0Mamii7v3\ncwlhOTDLqXQgkBPZve5YkhJekGG5x9quO6+IgvPrJndGTOPThzfCOUGvWo52K5WK\nFp5DN6fMKCoXp4ATpN2Jk5CJV/oFEwIDAQABozEwLzAOBgNVHQ8BAf8EBAMCB4Aw\nHQYDVR0OBBYEFKas1ZdV+YXBoGuu8+vxG9gAE7uOMA0GCSqGSIb3DQEBCwUAA4IB\nAQCBLSXoBqIviJ8vZ+VRUO/KTkkxTS7Rrr/wUjRQx+8FwPxoYGcrTLZCoZdvu5r4\nIeJHZJb54Ta5O54A3FK28yMdT45EXAGaGYIlTPXPv7YgRhVCO3hfFCaRf4Rdyg0C\nhamDt5jy4arNKSeY+DmP0PSOu92k2V+VxvlghKrIToYuPAi7KkiwmMh8hBW52oBD\nVZqcbdTTKYbAdYJLkCw+xTiF8J96ar6A1aQ1si6tHB+SgjBkdc8tSq0Xq2TPmKwf\n/+TFbvWu2/8AnGXzTuV5qCOeNmDxLD8s6Bw4mPlOmLaXht0MwcX1DCKHX6a5JTg3\nd13RYEXuOoF+P0uL/3Yde/Lx\n-----END CERTIFICATE-----
-EOF
-  intermediate_cert = <<EOF
------BEGIN CERTIFICATE-----\nMIIDAjCCAeqgAwIBAgIBATANBgkqhkiG9w0BAQsFADASMRAwDgYDVQQDDAdSdWJ5\nIENBMB4XDTE0MTAwMTA5NTIxNVoXDTM0MTAwMTA5NTIxNVowEjEQMA4GA1UEAwwH\nUnVieSBDQTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBANK9WQOGymwG\nwSTgOHxYF/A2Fbjq0PL6V1HyBIlfuJkvfMXB/roO9xUqVicUaplES8okg687CBks\nWXB7oB6xIODdrtsD8iOWEnRajcLchY3AOLXoSmKo1RE0z9ofoXYJE4m1Vs9U+u3h\n2kUkoknDx7i8g5tqauFUEViRX5cly7/AxPlBShkAklQz9kIwYYLotoeoFUx1H4pK\nqRfWDNMTxHVVMysAjWBIUKkedMTmhkRX9+klaac+Yt9Tp9gRqR+hia6nWZGxl8pN\nfNYjddjetFDDYYCNKXXkaPjQJRyJgPzlfbv0ko+P3ydnQqXi5M7kHoY0+eD0Bk/g\nAOKX/H6Ycb8CAwEAAaNjMGEwDwYDVR0TAQH/BAUwAwEB/zAOBgNVHQ8BAf8EBAMC\nAQYwHQYDVR0OBBYEFJ5fDi8vB5G8h1SRo5EYNyv9thcZMB8GA1UdIwQYMBaAFJ5f\nDi8vB5G8h1SRo5EYNyv9thcZMA0GCSqGSIb3DQEBCwUAA4IBAQCWocdgvcOgjbQX\nj5WSCwcMNxU824l6ZNcmLUhxsuxSDhWF0OzAeGrFA9a3wAr1/viAUeJSgogUHZrt\nl9a14vWYVfnUnOP1a4gwp/eSZI7KAbkinJt4cfiu40vWLuar/sFCt+7OIDgpfgtU\nXhMNnEyix+O276rWkTXrHcNpknnzJiuX4o5bU0QNMNRcfCKlZU7XCDBPGfIwhd+x\nRbKLQnW+lsZK0++O3dY1JaqrkFtEd+YoqtXdXaZdYy6mJ9HAvoOfSbZ6iozBkyco\nLEDXBlC1t+g+4xl97MV8EcZNRr46txO3HbqLFSryahC5xKVbU3rklOLZH60M1eb8\nirOZ2jNp\n-----END CERTIFICATE-----
-EOF
-  private_key = <<EOF
------BEGIN RSA PRIVATE KEY-----\nMIIEpQIBAAKCAQEA2Li8pnuy9z3IZNoE2KOTP3sojShB9gVqSt176AYPAq3sV9zp\nNH0WmEZz2GAo3ETp6fkGkFyIHVuib8zkzqjQmMQrsMHW616ucEuCTOU72fH4CIOK\nTSRIkErOnpYIN5DeQzOUYAwAqPljrj24pVLY3LeTJbWYGfrI/c4kx7CrRYE8MO89\nspd498cY4qDDkoHIpiFJUeySV2LHsoOsoxy5cxGgdsD/LBnAaRLlLHjrZMXHo/E0\nMamii7v3cwlhOTDLqXQgkBPZve5YkhJekGG5x9quO6+IgvPrJndGTOPThzfCOUGv\nWo52K5WKFp5DN6fMKCoXp4ATpN2Jk5CJV/oFEwIDAQABAoIBAA3Fe3Nm0+IDIotK\nEVnE1zQG+vYxUzOzd2Qne9qsG+MTMzwIFSeZNUja3TyoK6CHnoeYI/MjdiDLdGB/\nWCDLuGmkuZQDVUlinFoVakPBo1J/nj/IQA8T2aqVnliUdxQ01/LUQb7ytE4Ifu2R\nDX0v7Qjlf2u7hN1Nwtzh7xNjZhbF+CHjX5KFG0K9+WWAFPNKCVexiGipDYDNYcFu\nC+3UOnMCKSn4QklusiWwiNn6tt/JfJUlNJYTxbWiDVuuB2l0qYnNUOS/mGp2j2iO\nfVBIckNJyPIPEhE0o4L+hQ43OZlujrKTmpVub1JZr1uiQ/7LQNqSIBoDMAlt3F8H\naizNpFUCgYEA7dh2rC05mCshvHS6VkCmP0xvRSp7jRYgmlAMw8lHOyGqhtaCGCIa\njyUkeo1tmljD1QohsUe+K9iKC63bBewTVsq9rNrGe7RZsgtqPUpK4z2uFdSZ8Hot\nwcTgvHaVqiBuyCaUvNkwIlXHxLQaPbaTT6jjhbSteuzHeMHJ1yFWRw0CgYEA6UOC\nONLPdggqxwXzzNro/aQlRRZaydIINKZfV//3t1ly5GIaMB4RiXQ01IGAvK8pqqPI\nNnS7b7qOOL/mxFO3/1Z4E5+iT73ZQtePZT66Mm0IltBihK8yXqN0DLJL1lAABFx8\nIPH75TLnFa2oV+849foBdwvLEC7DnQNV8at6dJ8CgYEAn2WveopAjANz84nDC2T+\nRXOjKpZjANWwedpmA5xT+YQBdaYyv5uzcvVwchVwO717WL4WgGnVQCs5sMQOAfUJ\nrOPoo/xmgqcGabUOuQ6eC5bdoVG+7RPksHSSLJvIh6B+vfJlQf7ILGqSm/gbkfpW\n1U8ZVBUXIkenEv3EmEGGQc0CgYEA1xYmp1rLbVyOhUHZ0lUwbWDD9PZt9Ja0dkfK\ntowR0ICsTiafWyr+pK4AYMqg+FrTosKuxHfStW1h4rYghXtkuA71XbLeqYS3Jsk5\nMfQrIIAlYVr43LvnSBiT03k8MHtH6L2Wv5Ih4O+U4Qplpd+xuC40156KOXvFZ6xB\nvTuPCKUCgYEAzgyMeybEfFIHhZgkTW7fyNv0f+tQelx3/16WHr41VCGoNEC7Nuoh\naTQVwkTiLjO9sxeVBle3cX1ZlSVxxigNBonhHkedO4Bs/zUODJSLbzh0mGm2RnRE\nENt4XYX6bLBagz9+Yd1Rdh7kAcUwyW4THHslBRX+hdVgAxqBgQ5mU90=\n-----END RSA PRIVATE KEY-----
-EOF
+resource "edgio_property" "my_property" {
+  organization_id = var.organization_id
+  slug = "test-edgio-property"
 }
 
-output "added_purge_cache" {
-  value = edgio_tls_cert.my_cert
+resource "edgio_environment" "my_env" {
+  property_id = edgio_property.my_property.id
+  name        = "main"
+  only_maintainers_can_deploy = false  
+  http_request_logging = true
 }
- 
- 
+
+resource "edgio_cdn_configuration" "my_cdn_configuration" {
+    environment_id = edgio_environment.my_env.id
+    rules = jsonencode(
+    [
+        {
+            "if": [
+            {
+                "==": [
+                {
+                    "request": "path"
+                },
+                "/:path*"
+                ]
+            },
+            {
+                "origin": {
+                    "set_origin": "edgio_serverless"
+                },
+                "headers": {
+                "set_request_headers": {
+                    "+x-cloud-functions-hint": "app"
+                }
+                }
+            }
+            ]
+        }
+    ])	
+    origins = [
+        {
+            name: "origin-1",
+            type: "customer_origin",	
+            balancer: "round_robin",
+            override_host_header: "edgio-terraform-example.com",
+            pci_certified_shields: false,			
+            hosts: [
+                {
+                    scheme: "https",
+                    weight: 100,
+                    use_sni: false,
+                    balancer: "round_robin",
+                    location: [
+                    {
+                        port: 443,
+                        hostname: "origin.edgio-terraform-example.com"
+                    }
+                    ],
+                    max_pool: 0,
+                    dns_max_ttl: 3600,
+                    dns_min_ttl: 600,
+                    max_hard_pool: 10,
+                    dns_preference: "prefv4",
+                    override_host_header: "edgio-terraform-example.com",
+                    sni_hint_and_strict_san_check: "edgio-terraform-example.com"
+                }
+            ],
+        }
+    ]
+
+    hostnames = [{
+        hostname             = "cdn.edgio-terraform-example.com"
+        default_origin_name  = "origin-1"
+
+        tls = {
+            npn                = true
+            alpn               = true
+            protocols          = "TLSv1.2"
+            use_sigalgs        = true
+            sni                = true
+            sni_strict         = true
+            sni_host_match     = true
+            client_renegotiation = false
+            cipher_list        = "ECDHE-RSA-AES128-GCM-SHA256"
+        }
+    }]		
+}
+
+resource "edgio_tls_cert" "my_cert" {
+    depends_on = [edgio_cdn_configuration.my_cdn_configuration]
+    environment_id    = edgio_environment.my_env.id
+    primary_cert      = "-----BEGIN CERTIFICATE-----\nMIIDGjCCAgKgAwIBAgIBAjANBgkqhkiG9w0BAQsFADASMRAwDgYDVQQDDAdSdWJ5\nIENBMB4XDTI0MTAxNTA4MTAzOFoXDTI1MTAxNTA4MTAzOFowXDETMBEGCgmSJomT\n8ixkARkWA29yZzEZMBcGCgmSJomT8ixkARkWCXJ1YnktbGFuZzEqMCgGA1UEAwwh\nZWRnaW8tdGVycmFmb3JtLXByb3ZpZGVyLXRlc3QuY29tMIIBIjANBgkqhkiG9w0B\nAQEFAAOCAQ8AMIIBCgKCAQEAxDVYjQfoSNT7QFI7LgFl4Z3R2ye4Co0wnyq5KebD\nRveVOuMIsiTwm//7MrdJ2kYVFRLlFiC9e71OMSRpiBWYgW0l4Zew/L5uI0pLq2zQ\nMpZHsUhJkzVm6H8p59hosNs6G435m561yuGzSY6ze5c0kRWG1DKA2ckqFr8DbHdX\nvH/ao3Gr+XiA1OXQFf4BUJG5pAmMvTOZAGXHcr/4t+aFDoS/V7ZifP7ZvchnntTA\n2aGgpo4Kmxjfx1Kr5jsZkDpcqoltW+NbUJMfNpy/IWdJPQI6Sfzm1ffPTUCzyq7o\nUVpC4aAxDFxileoQ4LsZfkvIZkRO5C6PfoE9X+xt/NlnmwIDAQABozEwLzAOBgNV\nHQ8BAf8EBAMCB4AwHQYDVR0OBBYEFG5oVK9F5TDjWCrtA3sPmgzHUtUOMA0GCSqG\nSIb3DQEBCwUAA4IBAQCav70f8mfvIhoMmaL0NPGUoVadt0E9DEspsA3y5CtO+yHm\nTPJSDpIZlAi2UF4hOuvhR7RIxCeUZVd7C2w3kTkQTttxOLY3D7wVNmnVgTpBzrR5\njhJWg0lsvMC/Kld10v7TzIjEReqj0NQzuJta0etqhBxTDV9e7k5Sk210M0MtFMvV\n2jBWSOOXV8m4EBNN9ooPc5c4rFTxyJTwAil9Iji3VeJ+NvwvW5rLDpemVcfsKCOz\nfWzGofvEfCnxz1sIJPTwFNAY5LtsQsxjk4/FFA6k/x81Ji19Y3Aq/+FgdoQcmBtF\nD4lJhbRqaIp6scJJjiTmintj7y4qbLZZOkJ0nAYx\n-----END CERTIFICATE-----\n"
+    intermediate_cert = "-----BEGIN CERTIFICATE-----\nMIIDAjCCAeqgAwIBAgIBATANBgkqhkiG9w0BAQsFADASMRAwDgYDVQQDDAdSdWJ5\nIENBMB4XDTE0MTAxNTA4MTAzOFoXDTM0MTAxNTA4MTAzOFowEjEQMA4GA1UEAwwH\nUnVieSBDQTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALz2S/0OVLyn\nJsPDbrAEQkKO+aaRpbBbljFy6vJ49sgoX5BFEtrt16DDJcQktHyJEWLEeWsuG//0\nNpd+FC1GwF4Ns9ziPvTfZgSNYzaGuueNLi8qIyMXCo5F4r8dwF5dKSdvO2VuJzuM\n3a9g6iCXidi+Tvy1Ue6S9G026+WyO20ZA1ovf3G5YyoQA9ZegmvPGg+IzWvCQHP9\nmTYb7MyTC6pM1+WfH5hie05KIM8xohcbu+yBtZ3TnkyOYB63ePW3DEeGoTHoNpj8\nvFOTF44WKljMQhoYxte/n+WWmYoEUd/kV10V6Z6m9uMaagL9NuxWryQuwpd8qTw6\nBBCuSmtJlw0CAwEAAaNjMGEwDwYDVR0TAQH/BAUwAwEB/zAOBgNVHQ8BAf8EBAMC\nAQYwHQYDVR0OBBYEFAw1s247NtKd26sne+81Fu7g/fMFMB8GA1UdIwQYMBaAFAw1\ns247NtKd26sne+81Fu7g/fMFMA0GCSqGSIb3DQEBCwUAA4IBAQB2AoShX2rwzWzY\n8HUYkmdpEfBfKetsWfVrrHnL5hIuwWzzpWY9MHE7VhFUKXSy3RNY0yaWdpozOpz5\nYm77+oJuZgdOyuGLFvySTtElJmK7r8vya5oFGpAgRObzfunL/7wXbXrpTeQFvTZ6\nlGz8fM8GpNIq0v7pxpT+CDBFveYZLL3n0KzuHC4D/YIc4FzeabFGUk9zx1hGLbiD\nh9qHNktax1U6ZXFy8SkEzdXjrf6XbbdY190W7bklNlLaM04Jl9rsGyGgLOfkXIeR\ntOo8WRZeKIjp+PmpUdKUzgo0GRNmVIbax/drc8tTXxXm5NSeo6plFgxG8qpfAGp3\nFmf9Ptew\n-----END CERTIFICATE-----\n"
+    private_key       = "-----BEGIN RSA PRIVATE KEY-----\nMIIEpAIBAAKCAQEAxDVYjQfoSNT7QFI7LgFl4Z3R2ye4Co0wnyq5KebDRveVOuMI\nsiTwm//7MrdJ2kYVFRLlFiC9e71OMSRpiBWYgW0l4Zew/L5uI0pLq2zQMpZHsUhJ\nkzVm6H8p59hosNs6G435m561yuGzSY6ze5c0kRWG1DKA2ckqFr8DbHdXvH/ao3Gr\n+XiA1OXQFf4BUJG5pAmMvTOZAGXHcr/4t+aFDoS/V7ZifP7ZvchnntTA2aGgpo4K\nmxjfx1Kr5jsZkDpcqoltW+NbUJMfNpy/IWdJPQI6Sfzm1ffPTUCzyq7oUVpC4aAx\nDFxileoQ4LsZfkvIZkRO5C6PfoE9X+xt/NlnmwIDAQABAoIBAAO8HjjlByNnxnaV\neiHojedrCSUaTvMId/33orms9leh+9m4m6BEer4Fc+MlwQaiIeGaT/kJW4IA+v2N\ne2LHQnVoPfna2NgeydrrHaCgPCBSYv/5Z8khEZnoXcRXhrqjGaqPm8o+DajUfgSu\n7jSyjqIaXkwov/IlVaNENIz6gpWIcvjidTEJ6KJLbC9N5BBs/kuyJobSYd3fJZ+Z\nWXSbVx22SgHyCJgtlE/jhHyeKhQy7MEfuCk6gBiTxcpCLTEOQWMQDbq1wZs4nA3o\n+0rPQ/KgHmm27vZfbFU3i+V+AWSwlXFKd7FWZus2FsJfzYZL3BS1gbFxfeAkfc46\nQ78Y3SkCgYEA4/eLVfvijfmQ7R6iKfkPCwx8bEvQD2YZcBjHzzWY76YQfE/4Ixqa\n2ARKnpmOpRu4oUxioXmgrTUdlC7sVnIpx5s2HPVrLqwoyFXS8Wp0VjOTSf+TGDCy\nBon6Ljjgn6Kj1NhlWsf+Hijt4pZ9e7++LESkCNKIVmCM4Qj5boMJCtMCgYEA3FYI\nlyVF+9gjo+uLK09+1xUMagQ8TbtVk6IA+ZnxtMtikZPkt2OWFIIEU4KGF/k3FvEB\nLnOFQ7C1RhZTsozjpyfcO2oqijkLyI+EgOf7g/ATgm9HtLnrcw8F23EyjX2RxcoL\nIQDv6gHdGPSnuxGv57y/R9LRJjXJRvPrt+LBoxkCgYEA4LfVb1YUNzXrKgNHga6U\nqKSPRkXZfER+EOUsmdLQxnPhzlkaVqhUOVrJn9vpJFLWRpJAq8J0pCk21isHKBPz\noWMcDaHTHTfyH8GSZg41TgAbUheQjYj7BL0glE3XByXQ7/C8wKdilaJtFS6Z1dHm\nikbDmDrI0LTuSqqJDuo2kKcCgYEAlxopKf5V0DCZwIB4IGuUAMxehxYAhQ5D0cr4\nADSineoc3tkdsOaKteW0MdEBRM+UCBefR8vRSGqW5knJfFlChg+/6L8WDVSx0Akc\nRYrR4dlyh7Do6/fUkENtMOCgWogSwCGfIDMUVNaSWdrubEvk5nd6djcNV7brIc2F\nicXoJYECgYBQXP5DYzGWH0V5a/V/W26KNAeB1zdw7F2l975nGkgmIw5QdAsZzWh+\nqZaOiGwO7tml63wiOCF/mJ2jhhio1p+AWfQco9JWwRUQP8p9RSqHlG60fVFIqzGK\noKt8Kxv8gR0m/10zxkFexog/N+jIfr4eMveF0XoiOg455adPAZN2lA==\n-----END RSA PRIVATE KEY-----\n"
+}
+
+output "added_property" {
+  value = edgio_property.my_property
+}

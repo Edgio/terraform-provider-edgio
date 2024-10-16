@@ -47,9 +47,6 @@ func (r *PropertyResource) Schema(_ context.Context, _ resource.SchemaRequest, r
 			"id_link": schema.StringAttribute{
 				Computed: true,
 			},
-			"type": schema.StringAttribute{
-				Computed: true,
-			},
 			"created_at": schema.StringAttribute{
 				Computed: true,
 			},

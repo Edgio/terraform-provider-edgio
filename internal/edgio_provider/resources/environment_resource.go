@@ -44,17 +44,11 @@ func (r *EnvironmentResource) Schema(_ context.Context, _ resource.SchemaRequest
 			"name": schema.StringAttribute{
 				Required: true,
 			},
-			"can_members_deploy": schema.BoolAttribute{
+			"only_maintainers_can_deploy": schema.BoolAttribute{
 				Optional: true,
 				Computed: true,
 				Default:  booldefault.StaticBool(false),
 			},
-			// TODO: This is not in the update API, resolve this later
-			// "only_maintainers_can_deploy": schema.BoolAttribute{
-			// 	Optional: true,
-			// 	Computed: true,
-			// 	Default:  booldefault.StaticBool(false),
-			// },
 			"http_request_logging": schema.BoolAttribute{
 				Optional: true,
 				Computed: true,
@@ -91,8 +85,7 @@ func (r *EnvironmentResource) Create(ctx context.Context, req resource.CreateReq
 	env, err := r.client.CreateEnvironment(
 		plan.PropertyID.ValueString(),
 		plan.Name.ValueString(),
-		plan.CanMembersDeploy.ValueBool(),
-		false,
+		plan.OnlyMaintainersCanDeploy.ValueBool(),
 		plan.HttpRequestLogging.ValueBool())
 
 	if err != nil {
@@ -148,7 +141,7 @@ func (r *EnvironmentResource) Update(ctx context.Context, req resource.UpdateReq
 	updatedEnv, err := r.client.UpdateEnvironment(
 		state.Id.ValueString(),
 		plan.Name.ValueString(),
-		plan.CanMembersDeploy.ValueBool(),
+		plan.OnlyMaintainersCanDeploy.ValueBool(),
 		plan.HttpRequestLogging.ValueBool(),
 		// TODO: What to do with this, it's not in the plan?
 		false)

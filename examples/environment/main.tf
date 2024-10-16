@@ -6,16 +6,25 @@ terraform {
   }
 }
 
+variable "client_id" { type = string }
+variable "client_secret" {  type = string }
+variable "organization_id" { type = string }
+
 provider "edgio" {
-  client_id     = "f8c1d12a-ee43-44d9-816a-bd73b7441ca5"
-  client_secret = "veBWKIS5vY9akbw5UaqksF7Et29lQnDo"
+  client_id     = var.client_id
+  client_secret = var.client_secret
+}
+
+resource "edgio_property" "my_property" {
+  organization_id = var.organization_id
+  slug            = "edgio-environment-example"
 }
 
 resource "edgio_environment" "my_env" {
-  property_id = "aba651c5-4bf5-426d-ad33-cf44b8aac63e"
-  name        = "new-env-changed"
-  can_members_deploy = true  
-  http_request_logging = true
+  property_id                 = edgio_property.my_property.id
+  name                        = "main"
+  only_maintainers_can_deploy = true  
+  http_request_logging        = true
 }
 
 output "added_env" {

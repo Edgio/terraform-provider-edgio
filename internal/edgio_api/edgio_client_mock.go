@@ -46,13 +46,13 @@ func (m *MockEdgioClient) GetEnvironment(environmentID string) (*dtos.Environmen
 	return args.Get(0).(*dtos.Environment), args.Error(1)
 }
 
-func (m *MockEdgioClient) CreateEnvironment(propertyID, name string, canMembersDeploy, onlyMaintainersCanDeploy, httpRequestLogging bool) (*dtos.Environment, error) {
-	args := m.Called(propertyID, name, canMembersDeploy, onlyMaintainersCanDeploy, httpRequestLogging)
+func (m *MockEdgioClient) CreateEnvironment(propertyID, name string, onlyMaintainersCanDeploy, httpRequestLogging bool) (*dtos.Environment, error) {
+	args := m.Called(propertyID, name, onlyMaintainersCanDeploy, httpRequestLogging)
 	return args.Get(0).(*dtos.Environment), args.Error(1)
 }
 
-func (m *MockEdgioClient) UpdateEnvironment(environmentID, name string, canMembersDeploy, httpRequestLogging, preserveCache bool) (*dtos.Environment, error) {
-	args := m.Called(environmentID, name, canMembersDeploy, httpRequestLogging, preserveCache)
+func (m *MockEdgioClient) UpdateEnvironment(environmentID, name string, onlyMaintainersCanDeploy, httpRequestLogging, preserveCache bool) (*dtos.Environment, error) {
+	args := m.Called(environmentID, name, onlyMaintainersCanDeploy, httpRequestLogging, preserveCache)
 	return args.Get(0).(*dtos.Environment), args.Error(1)
 }
 

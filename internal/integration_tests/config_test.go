@@ -31,7 +31,7 @@ func TestConfig_Lifecycle(t *testing.T) {
 						"edgio_property.prop_env_test", "id",
 					),
 					resource.TestCheckResourceAttr("edgio_environment.env_test", "name", "example-environment"),
-					resource.TestCheckResourceAttr("edgio_environment.env_test", "can_members_deploy", "true"),
+					resource.TestCheckResourceAttr("edgio_environment.env_test", "only_maintainers_can_deploy", "true"),
 					resource.TestCheckResourceAttr("edgio_environment.env_test", "http_request_logging", "true"),
 				),
 			},
@@ -43,7 +43,7 @@ func TestConfig_Lifecycle(t *testing.T) {
 						"edgio_property.prop_env_test", "id",
 					),
 					resource.TestCheckResourceAttr("edgio_environment.env_test", "name", "updated-environment"),
-					resource.TestCheckResourceAttr("edgio_environment.env_test", "can_members_deploy", "false"),
+					resource.TestCheckResourceAttr("edgio_environment.env_test", "only_maintainers_can_deploy", "false"),
 					resource.TestCheckResourceAttr("edgio_environment.env_test", "http_request_logging", "false"),
 				),
 			},
@@ -66,7 +66,7 @@ func getConfigConfig(clientID, clientSecret, organizationID, propertySlug, envNa
 	resource "edgio_environment" "env_test" {
 		property_id         = edgio_property.prop_env_test.id
 		name                = "%s"
-		can_members_deploy  = %t
+		only_maintainers_can_deploy  = %t
 		http_request_logging = %t
 	}
 	
@@ -122,7 +122,7 @@ func getConfigConfig(clientID, clientSecret, organizationID, propertySlug, envNa
 						sni_hint_and_strict_san_check: "edgio-terraform-provider-test.com"
 					}
 				],
-				balancer: "round_robin",
+				
 				override_host_header: "edgio-terraform-provider-test.com",
 				pci_certified_shields: false
 			}

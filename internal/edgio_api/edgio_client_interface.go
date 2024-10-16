@@ -14,8 +14,8 @@ type EdgioClientInterface interface {
 	UpdateProperty(ctx context.Context, propertyID string, slug string) (*dtos.Property, error)
 	GetEnvironments(page, pageSize int, propertyID string) (*dtos.EnvironmentsResponse, error)
 	GetEnvironment(environmentID string) (*dtos.Environment, error)
-	CreateEnvironment(propertyID, name string, canMembersDeploy, onlyMaintainersCanDeploy, httpRequestLogging bool) (*dtos.Environment, error)
-	UpdateEnvironment(environmentID, name string, canMembersDeploy, httpRequestLogging, preserveCache bool) (*dtos.Environment, error)
+	CreateEnvironment(propertyID, name string, onlyMaintainersCanDeploy, httpRequestLogging bool) (*dtos.Environment, error)
+	UpdateEnvironment(environmentID, name string, onlyMaintainersCanDeploy, httpRequestLogging, preserveCache bool) (*dtos.Environment, error)
 	DeleteEnvironment(environmentID string) error
 	PurgeCache(purgeRequest *dtos.PurgeRequest) (*dtos.PurgeResponse, error)
 	GetPurgeStatus(requestId string) (*dtos.PurgeResponse, error)

@@ -9,7 +9,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
@@ -42,69 +41,8 @@ func (d *PropertiesDataSource) Schema(ctx context.Context, req datasource.Schema
 					 It is listed under Organization ID."`,
 			},
 			"item_count": schema.Int32Attribute{
-				Computed:    true,
-				Description: `The total number of items in the list.`,
-			},
-			"links": schema.SingleNestedAttribute{
-				Computed: true,
-				Attributes: map[string]schema.Attribute{
-					"first": schema.SingleNestedAttribute{
-						Computed: true,
-						Attributes: map[string]schema.Attribute{
-							"href": schema.StringAttribute{
-								Computed: true,
-							},
-							"description": schema.StringAttribute{
-								Computed: true,
-							},
-							"base_path": schema.StringAttribute{
-								Computed: true,
-							},
-						},
-					},
-					"next": schema.SingleNestedAttribute{
-						Computed: true,
-						Attributes: map[string]schema.Attribute{
-							"href": schema.StringAttribute{
-								Computed: true,
-							},
-							"description": schema.StringAttribute{
-								Computed: true,
-							},
-							"base_path": schema.StringAttribute{
-								Computed: true,
-							},
-						},
-					},
-					"previous": schema.SingleNestedAttribute{
-						Computed: true,
-						Attributes: map[string]schema.Attribute{
-							"href": schema.StringAttribute{
-								Computed: true,
-							},
-							"description": schema.StringAttribute{
-								Computed: true,
-							},
-							"base_path": schema.StringAttribute{
-								Computed: true,
-							},
-						},
-					},
-					"last": schema.SingleNestedAttribute{
-						Computed: true,
-						Attributes: map[string]schema.Attribute{
-							"href": schema.StringAttribute{
-								Computed: true,
-							},
-							"description": schema.StringAttribute{
-								Computed: true,
-							},
-							"base_path": schema.StringAttribute{
-								Computed: true,
-							},
-						},
-					},
-				},
+				Required:    true,
+				Description: `The total number of items to load.`,
 			},
 			"properties": schema.ListNestedAttribute{
 				Computed: true,
@@ -117,10 +55,6 @@ func (d *PropertiesDataSource) Schema(ctx context.Context, req datasource.Schema
 						"id_link": schema.StringAttribute{
 							Computed:    true,
 							Description: "The resource's relative path.",
-						},
-						"type": schema.StringAttribute{
-							Computed:    true,
-							Description: "The resource's type.",
 						},
 						"slug": schema.StringAttribute{
 							Computed:    true,
@@ -148,23 +82,26 @@ func (d *PropertiesDataSource) Schema(ctx context.Context, req datasource.Schema
 }
 
 func (d *PropertiesDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var organizationID string
-	diags := req.Config.GetAttribute(ctx, path.Root("organization_id"), &organizationID)
+	var state models.PropertiesModel
+	diags := req.Config.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	properties, err := d.client.GetProperties(1, 10, organizationID)
+	properties, err := d.client.GetProperties(0, int(state.ItemCount.ValueInt32()), state.OrganizationID.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Error reading properties", err.Error())
 		return
 	}
 
-	state := models.PropertiesModel{
-		OrganizationID: types.StringValue(organizationID),
-		ItemCount:      types.Int32Value(int32(properties.TotalItems)),
+	newState := models.PropertiesModel{
+		OrganizationID: state.OrganizationID,
+		ItemCount:      state.ItemCount,
 		Properties:     []models.PropertyModel{},
 	}
 
@@ -174,15 +111,14 @@ func (d *PropertiesDataSource) Read(ctx context.Context, req datasource.ReadRequ
 			IdLink:         types.StringValue(property.IdLink),
 			Slug:           types.StringValue(property.Slug),
 			OrganizationID: types.StringValue(property.OrganizationID),
-			Type:           types.StringValue(property.Type),
 			CreatedAt:      types.StringValue(property.CreatedAt.Format(time.RFC3339)),
 			UpdatedAt:      types.StringValue(property.UpdatedAt.Format(time.RFC3339)),
 		}
 
-		state.Properties = append(state.Properties, propertyState)
+		newState.Properties = append(newState.Properties, propertyState)
 	}
 
-	diags = resp.State.Set(ctx, &state)
+	diags = resp.State.Set(ctx, &newState)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return

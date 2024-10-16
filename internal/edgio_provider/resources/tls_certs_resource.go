@@ -226,5 +226,5 @@ func (r *TLSCertsResource) Update(ctx context.Context, req resource.UpdateReques
 }
 
 func (r *TLSCertsResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	resp.Diagnostics.AddWarning("Error Deleting Tls Cert Cache", "Deleting Tls Cert not supported")
+	// todo: should we add a warning here?
 }

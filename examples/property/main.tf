@@ -17,7 +17,7 @@ provider "edgio" {
 
 resource "edgio_property" "my_property" {
   organization_id = var.organization_id
-  slug = "demo-property-changed"
+  slug = "edgio-property-example"
 }
 
 output "added_property" {

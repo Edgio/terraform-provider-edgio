@@ -36,11 +36,11 @@ func mockAllEnvironmentMethods(mockClient *edgio_api.MockEdgioClient, methods ..
 	for _, method := range methods {
 		switch method {
 		case utility.MockCreate:
-			mockClient.On("CreateEnvironment", "property-123", "example-environment", true, false, true).Return(environment, nil)
+			mockClient.On("CreateEnvironment", "property-123", "example-environment", false, true).Return(environment, nil)
 		case utility.MockGet:
 			mockClient.On("GetEnvironment", "env-123").Return(environment, nil)
 		case utility.MockUpdate:
-			mockClient.On("UpdateEnvironment", "env-123", "updated-environment", false, false, false).Run(func(args mock.Arguments) {
+			mockClient.On("UpdateEnvironment", "env-123", "updated-environment", false, false).Run(func(args mock.Arguments) {
 				environment.Name = "updated-environment"
 				environment.CanMembersDeploy = false
 				environment.HttpRequestLogging = false
@@ -73,13 +73,12 @@ func TestEnvironmentResource_Lifecycle(t *testing.T) {
 					property_id         = "property-123"
 					name                = "example-environment"
 					only_maintainers_can_deploy = false
-					can_members_deploy  = true
 					http_request_logging = true
 				}`,
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("edgio_environment.test", "property_id", "property-123"),
 					resource.TestCheckResourceAttr("edgio_environment.test", "name", "example-environment"),
-					resource.TestCheckResourceAttr("edgio_environment.test", "can_members_deploy", "true"),
+					resource.TestCheckResourceAttr("edgio_environment.test", "only_maintainers_can_deploy", "true"),
 					resource.TestCheckResourceAttr("edgio_environment.test", "http_request_logging", "true"),
 				),
 			},
@@ -93,13 +92,13 @@ func TestEnvironmentResource_Lifecycle(t *testing.T) {
 				resource "edgio_environment" "test" {
 					property_id         = "property-123"
 					name                = "updated-environment"
-					can_members_deploy  = false
+					only_maintainers_can_deploy  = false
 					http_request_logging = false
 				}`,
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("edgio_environment.test", "property_id", "property-123"),
 					resource.TestCheckResourceAttr("edgio_environment.test", "name", "updated-environment"),
-					resource.TestCheckResourceAttr("edgio_environment.test", "can_members_deploy", "false"),
+					resource.TestCheckResourceAttr("edgio_environment.test", "only_maintainers_can_deploy", "false"),
 					resource.TestCheckResourceAttr("edgio_environment.test", "http_request_logging", "false"),
 				),
 			},

@@ -14,7 +14,6 @@ func ConvertPropertyToModel(property *dtos.Property) models.PropertyModel {
 		Slug:           types.StringValue(property.Slug),
 		Id:             types.StringValue(property.Id),
 		IdLink:         types.StringValue(property.IdLink),
-		Type:           types.StringValue(property.Type),
 		CreatedAt:      types.StringValue(property.CreatedAt.Format(time.RFC3339)),
 		UpdatedAt:      types.StringValue(property.UpdatedAt.Format(time.RFC3339)),
 	}

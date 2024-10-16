@@ -391,5 +391,4 @@ func (r *CDNConfigurationResource) Update(ctx context.Context, req resource.Upda
 }
 
 func (r *CDNConfigurationResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	resp.Diagnostics.AddWarning("Operation Not Supported", "This resource does not support deletion.")
 }

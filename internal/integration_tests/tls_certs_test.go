@@ -31,7 +31,7 @@ func TestTlsCerts_Lifecycle(t *testing.T) {
 						"edgio_environment.env_test", "id",
 					),
 					resource.TestCheckResourceAttr("edgio_environment.env_test", "name", "example-environment"),
-					resource.TestCheckResourceAttr("edgio_environment.env_test", "can_members_deploy", "true"),
+					resource.TestCheckResourceAttr("edgio_environment.env_test", "only_maintainers_can_deploy", "true"),
 					resource.TestCheckResourceAttr("edgio_environment.env_test", "http_request_logging", "true"),
 				),
 			},
@@ -43,7 +43,7 @@ func TestTlsCerts_Lifecycle(t *testing.T) {
 						"edgio_environment.env_test", "id",
 					),
 					resource.TestCheckResourceAttr("edgio_environment.env_test", "name", "updated-environment"),
-					resource.TestCheckResourceAttr("edgio_environment.env_test", "can_members_deploy", "false"),
+					resource.TestCheckResourceAttr("edgio_environment.env_test", "only_maintainers_can_deploy", "false"),
 					resource.TestCheckResourceAttr("edgio_environment.env_test", "http_request_logging", "false"),
 				),
 			},
@@ -64,10 +64,10 @@ func getTlsCertsConfig(clientID, clientSecret, organizationID, propertySlug, env
 	}
 		
 	resource "edgio_environment" "env_test" {
-		property_id         = edgio_property.prop_env_test.id
-		name                = "%s"
-		can_members_deploy  = %t
-		http_request_logging = %t
+		property_id                 = edgio_property.prop_env_test.id
+		name                        = "%s"
+		only_maintainers_can_deploy = %t
+		http_request_logging        = %t
 	}
 	
 	resource "edgio_cdn_configuration" "my_cdn_configuration" {

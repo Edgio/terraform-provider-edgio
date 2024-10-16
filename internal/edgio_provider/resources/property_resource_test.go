@@ -23,7 +23,6 @@ func mockAllPropertyMethods(mockClient *edgio_api.MockEdgioClient, methods ...ut
 		Slug:           "example-slug",
 		Id:             "property-123",
 		IdLink:         "property-link-123",
-		Type:           "example-type",
 		CreatedAt:      fixedTime,
 		UpdatedAt:      updatedAt,
 	}

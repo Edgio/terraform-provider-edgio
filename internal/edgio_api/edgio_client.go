@@ -134,7 +134,7 @@ func (c *EdgioClient) GetProperties(page int, pageSize int, organizationID strin
 	}
 
 	if resp.IsError() {
-		return nil, fmt.Errorf("unexpected status code for getProperties: %d", resp.StatusCode())
+		return nil, fmt.Errorf("unexpected status code for getProperties: %d, %s", resp.StatusCode(), resp.Body())
 	}
 
 	return &propertiesResp, nil
@@ -281,7 +281,7 @@ func (c *EdgioClient) GetEnvironment(environmentID string) (*dtos.Environment, e
 	return resp.Result().(*dtos.Environment), nil
 }
 
-func (c *EdgioClient) CreateEnvironment(propertyID, name string, canMembersDeploy, onlyMaintainersCanDeploy, httpRequestLogging bool) (*dtos.Environment, error) {
+func (c *EdgioClient) CreateEnvironment(propertyID, name string, onlyMaintainersCanDeploy, httpRequestLogging bool) (*dtos.Environment, error) {
 	token, err := c.getToken("app.accounts")
 	if err != nil {
 		return nil, fmt.Errorf("failed to get token: %w", err)
@@ -292,7 +292,6 @@ func (c *EdgioClient) CreateEnvironment(propertyID, name string, canMembersDeplo
 	body := map[string]interface{}{
 		"property_id":                 propertyID,
 		"name":                        name,
-		"can_members_deploy":          canMembersDeploy,
 		"only_maintainers_can_deploy": onlyMaintainersCanDeploy,
 		"http_request_logging":        httpRequestLogging,
 	}
@@ -314,7 +313,7 @@ func (c *EdgioClient) CreateEnvironment(propertyID, name string, canMembersDeplo
 	return resp.Result().(*dtos.Environment), nil
 }
 
-func (c *EdgioClient) UpdateEnvironment(environmentID, name string, canMembersDeploy, httpRequestLogging, preserveCache bool) (*dtos.Environment, error) {
+func (c *EdgioClient) UpdateEnvironment(environmentID, name string, onlyMaintainersCanDeploy, httpRequestLogging, preserveCache bool) (*dtos.Environment, error) {
 	token, err := c.getToken("app.accounts")
 	if err != nil {
 		return nil, fmt.Errorf("failed to get token: %w", err)
@@ -323,10 +322,12 @@ func (c *EdgioClient) UpdateEnvironment(environmentID, name string, canMembersDe
 	url := fmt.Sprintf("%s/accounts/v0.1/environments/%s", c.apiURL, environmentID)
 
 	body := map[string]interface{}{
-		"name":                 name,
-		"can_members_deploy":   canMembersDeploy,
-		"http_request_logging": httpRequestLogging,
-		"preserve_cache":       preserveCache,
+		"name": name,
+		// as only_maintainers_can_deploy is depricated, but update api is not
+		// we need to use it to map onlyMaintainersCanDeploy
+		"only_maintainers_can_deploy": onlyMaintainersCanDeploy,
+		"http_request_logging":        httpRequestLogging,
+		"preserve_cache":              preserveCache,
 	}
 
 	resp, err := c.client.R().
