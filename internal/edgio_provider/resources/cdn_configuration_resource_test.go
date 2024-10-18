@@ -138,15 +138,15 @@ func TestCDNConfigurationResource_Lifecycle(t *testing.T) {
 						default_origin_name  = "origin-1"         # Optional default origin name
 
 						tls = {
-						npn                = true
-						alpn               = true
-						protocols          = "TLSv1.2"
-						use_sigalgs        = true
-						sni                = true
-						sni_strict         = true
-						sni_host_match     = true
-						client_renegotiation = false
-						cipher_list        = "ECDHE-RSA-AES128-GCM-SHA256"
+							npn                = true
+							alpn               = true
+							protocols          = "TLSv1.2"
+							use_sigalgs        = true
+							sni                = true
+							sni_strict         = true
+							sni_host_match     = true
+							client_renegotiation = false
+							cipher_list        = "ECDHE-RSA-AES128-GCM-SHA256"
 						}
 					}]	
 				}`,
