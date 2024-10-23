@@ -8,7 +8,7 @@
         "mode": "test",
         "program": "${workspaceFolder}/internal/edgio_provider/resources",
         "args": [
-            "-test.run", "^TestTLSCertsResource_Upload$"
+            "-test.run", "^TestCDNConfigurationResource_Basic$"
         ]
     },
     {

@@ -18,7 +18,7 @@ func ConvertTlsCertsToModel(tlsRes *dtos.TLSCertResponse) models.TLSCertModel {
 		Generated:        types.BoolValue(tlsRes.Generated),
 		Serial:           types.StringValue(tlsRes.Serial),
 		CommonName:       types.StringValue(tlsRes.CommonName),
-		AlternativeNames: StringSliceToTypesList(tlsRes.AlternativeNames),
+		AlternativeNames: StringSliceToTypesList(&tlsRes.AlternativeNames),
 		ActivationError:  types.StringValue(tlsRes.ActivationError),
 		CreatedAt:        types.StringValue(tlsRes.CreatedAt),
 		UpdatedAt:        types.StringValue(tlsRes.UpdatedAt),

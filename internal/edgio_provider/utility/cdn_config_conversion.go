@@ -17,9 +17,9 @@ func ConvertCdnConfigToNative(model *models.CDNConfigurationModel) dtos.CDNConfi
 		EnvironmentID:          model.EnvironmentID.ValueString(),
 		Origins:                convertOriginsToNative(model.Origins),
 		Hostnames:              convertHostnamesToNative(model.Hostnames),
-		Experiments:            TypesListToStringSlice(model.Experiments),
-		EdgeFunctionsSources:   MapValueToStringMap(model.EdgeFunctionsSources),
-		EdgeFunctionInitScript: model.EdgeFunctionInitScript.ValueString(),
+		Experiments:            TypesListToStringSlicePointer(model.Experiments),
+		EdgeFunctionsSources:   MapValueToStringMapPointer(model.EdgeFunctionsSources),
+		EdgeFunctionInitScript: model.EdgeFunctionInitScript.ValueStringPointer(),
 	}
 }
 
@@ -43,7 +43,7 @@ func ConvertNativeToCdnConfig(dto *dtos.CDNConfiguration) models.CDNConfiguratio
 		Hostnames:              convertNativeToHostnames(dto.Hostnames),
 		Experiments:            StringSliceToTypesList(dto.Experiments),
 		EdgeFunctionsSources:   StringMapToMapValue(dto.EdgeFunctionsSources),
-		EdgeFunctionInitScript: types.StringValue(dto.EdgeFunctionInitScript),
+		EdgeFunctionInitScript: types.StringPointerValue(dto.EdgeFunctionInitScript),
 	}
 }
 
@@ -87,11 +87,11 @@ func convertHostnamesToNative(hostnames []models.HostnameModel) []dtos.Hostname 
 	var natives []dtos.Hostname
 	for _, hostname := range hostnames {
 		natives = append(natives, dtos.Hostname{
-			Hostname:          hostname.Hostname.ValueString(),
-			DefaultOriginName: hostname.DefaultOriginName.ValueString(),
-			ReportCode:        int(hostname.ReportCode.ValueInt64()),
+			Hostname:          hostname.Hostname.ValueStringPointer(),
+			DefaultOriginName: hostname.DefaultOriginName.ValueStringPointer(),
+			ReportCode:        hostname.ReportCode.ValueInt64Pointer(),
 			TLS:               convertTLSToNative(hostname.TLS),
-			Directory:         hostname.Directory.ValueString(),
+			Directory:         hostname.Directory.ValueStringPointer(),
 		})
 	}
 	return natives
@@ -101,51 +101,59 @@ func convertNativeToHostnames(hostnames []dtos.Hostname) []models.HostnameModel 
 	var natives []models.HostnameModel
 	for _, hostname := range hostnames {
 		natives = append(natives, models.HostnameModel{
-			Hostname:          types.StringValue(hostname.Hostname),
-			DefaultOriginName: types.StringValue(hostname.DefaultOriginName),
-			ReportCode:        types.Int64Value(int64(hostname.ReportCode)),
+			Hostname:          types.StringValue(*hostname.Hostname),
+			DefaultOriginName: types.StringValue(*hostname.DefaultOriginName),
+			ReportCode:        types.Int64Value(int64(*hostname.ReportCode)),
 			TLS:               convertNativeToTLS(hostname.TLS),
-			Directory:         types.StringValue(hostname.Directory),
+			Directory:         types.StringValue(*hostname.Directory),
 		})
 	}
 	return natives
 }
 
-func convertTLSToNative(tls models.TLSModel) dtos.TLS {
-	return dtos.TLS{
-		NPN:                 tls.NPN.ValueBool(),
-		ALPN:                tls.ALPN.ValueBool(),
-		Protocols:           tls.Protocols.ValueString(),
-		UseSigAlgs:          tls.UseSigAlgs.ValueBool(),
-		SNI:                 tls.SNI.ValueBool(),
-		SniStrict:           tls.SniStrict.ValueBool(),
-		SniHostMatch:        tls.SniHostMatch.ValueBool(),
-		ClientRenegotiation: tls.ClientRenegotiation.ValueBool(),
-		Options:             tls.Options.ValueString(),
-		CipherList:          tls.CipherList.ValueString(),
-		NamedCurve:          tls.NamedCurve.ValueString(),
-		OCSP:                tls.OCSP.ValueBool(),
-		PEM:                 tls.PEM.ValueString(),
-		CA:                  tls.CA.ValueString(),
+func convertTLSToNative(tls *models.TLSModel) *dtos.TLS {
+	if tls == nil {
+		return nil
+	}
+
+	return &dtos.TLS{
+		NPN:                 tls.NPN.ValueBoolPointer(),
+		ALPN:                tls.ALPN.ValueBoolPointer(),
+		Protocols:           tls.Protocols.ValueStringPointer(),
+		UseSigAlgs:          tls.UseSigAlgs.ValueBoolPointer(),
+		SNI:                 tls.SNI.ValueBoolPointer(),
+		SniStrict:           tls.SniStrict.ValueBoolPointer(),
+		SniHostMatch:        tls.SniHostMatch.ValueBoolPointer(),
+		ClientRenegotiation: tls.ClientRenegotiation.ValueBoolPointer(),
+		Options:             tls.Options.ValueStringPointer(),
+		CipherList:          tls.CipherList.ValueStringPointer(),
+		NamedCurve:          tls.NamedCurve.ValueStringPointer(),
+		OCSP:                tls.OCSP.ValueBoolPointer(),
+		PEM:                 tls.PEM.ValueStringPointer(),
+		CA:                  tls.CA.ValueStringPointer(),
 	}
 }
 
-func convertNativeToTLS(tls dtos.TLS) models.TLSModel {
-	return models.TLSModel{
-		NPN:                 types.BoolValue(tls.NPN),
-		ALPN:                types.BoolValue(tls.ALPN),
-		Protocols:           types.StringValue(tls.Protocols),
-		UseSigAlgs:          types.BoolValue(tls.UseSigAlgs),
-		SNI:                 types.BoolValue(tls.SNI),
-		SniStrict:           types.BoolValue(tls.SniStrict),
-		SniHostMatch:        types.BoolValue(tls.SniHostMatch),
-		ClientRenegotiation: types.BoolValue(tls.ClientRenegotiation),
-		Options:             types.StringValue(tls.Options),
-		CipherList:          types.StringValue(tls.CipherList),
-		NamedCurve:          types.StringValue(tls.NamedCurve),
-		OCSP:                types.BoolValue(tls.OCSP),
-		PEM:                 types.StringValue(tls.PEM),
-		CA:                  types.StringValue(tls.CA),
+func convertNativeToTLS(tls *dtos.TLS) *models.TLSModel {
+	if tls == nil {
+		return nil
+	}
+
+	return &models.TLSModel{
+		NPN:                 types.BoolPointerValue(tls.NPN),
+		ALPN:                types.BoolPointerValue(tls.ALPN),
+		Protocols:           types.StringPointerValue(tls.Protocols),
+		UseSigAlgs:          types.BoolPointerValue(tls.UseSigAlgs),
+		SNI:                 types.BoolPointerValue(tls.SNI),
+		SniStrict:           types.BoolPointerValue(tls.SniStrict),
+		SniHostMatch:        types.BoolPointerValue(tls.SniHostMatch),
+		ClientRenegotiation: types.BoolPointerValue(tls.ClientRenegotiation),
+		Options:             types.StringPointerValue(tls.Options),
+		CipherList:          types.StringPointerValue(tls.CipherList),
+		NamedCurve:          types.StringPointerValue(tls.NamedCurve),
+		OCSP:                types.BoolPointerValue(tls.OCSP),
+		PEM:                 types.StringPointerValue(tls.PEM),
+		CA:                  types.StringPointerValue(tls.CA),
 	}
 }
 
@@ -155,11 +163,11 @@ func convertRetryToNative(retry *models.RetryModel) *dtos.Retry {
 	}
 
 	return &dtos.Retry{
-		StatusCodes:            TypesListToIntSlice(retry.StatusCodes),
-		IgnoreRetryAfterHeader: retry.IgnoreRetryAfterHeader.ValueBool(),
-		AfterSeconds:           int(retry.AfterSeconds.ValueInt64()),
-		MaxRequests:            int(retry.MaxRequests.ValueInt64()),
-		MaxWaitSeconds:         int(retry.MaxWaitSeconds.ValueInt64()),
+		StatusCodes:            TypesListToIntSlicePointer(retry.StatusCodes),
+		IgnoreRetryAfterHeader: retry.IgnoreRetryAfterHeader.ValueBoolPointer(),
+		AfterSeconds:           retry.AfterSeconds.ValueInt64Pointer(),
+		MaxRequests:            retry.MaxRequests.ValueInt64Pointer(),
+		MaxWaitSeconds:         retry.MaxWaitSeconds.ValueInt64Pointer(),
 	}
 }
 
@@ -170,10 +178,10 @@ func convertNativeToRetry(retry *dtos.Retry) *models.RetryModel {
 
 	return &models.RetryModel{
 		StatusCodes:            IntSliceToTypesList(retry.StatusCodes),
-		IgnoreRetryAfterHeader: types.BoolValue(retry.IgnoreRetryAfterHeader),
-		AfterSeconds:           types.Int64Value(int64(retry.AfterSeconds)),
-		MaxRequests:            types.Int64Value(int64(retry.MaxRequests)),
-		MaxWaitSeconds:         types.Int64Value(int64(retry.MaxWaitSeconds)),
+		IgnoreRetryAfterHeader: types.BoolPointerValue(retry.IgnoreRetryAfterHeader),
+		AfterSeconds:           types.Int64PointerValue(retry.AfterSeconds),
+		MaxRequests:            types.Int64PointerValue(retry.MaxRequests),
+		MaxWaitSeconds:         types.Int64PointerValue(retry.MaxWaitSeconds),
 	}
 }
 
@@ -183,10 +191,10 @@ func convertShieldsToNative(shields *models.ShieldsModel) *dtos.Shields {
 	}
 
 	return &dtos.Shields{
-		Apac:   shields.Apac.ValueString(),
-		Emea:   shields.Emea.ValueString(),
-		USWest: shields.USWest.ValueString(),
-		USEast: shields.USEast.ValueString(),
+		Apac:   shields.Apac.ValueStringPointer(),
+		Emea:   shields.Emea.ValueStringPointer(),
+		USWest: shields.USWest.ValueStringPointer(),
+		USEast: shields.USEast.ValueStringPointer(),
 	}
 }
 
@@ -196,10 +204,10 @@ func convertNativeToShields(shields *dtos.Shields) *models.ShieldsModel {
 	}
 
 	return &models.ShieldsModel{
-		Apac:   types.StringValue(shields.Apac),
-		Emea:   types.StringValue(shields.Emea),
-		USWest: types.StringValue(shields.USWest),
-		USEast: types.StringValue(shields.USEast),
+		Apac:   types.StringPointerValue(shields.Apac),
+		Emea:   types.StringPointerValue(shields.Emea),
+		USWest: types.StringPointerValue(shields.USWest),
+		USEast: types.StringPointerValue(shields.USEast),
 	}
 }
 
@@ -209,10 +217,10 @@ func convertTLSVerifyToNative(tlsVerify *models.TLSVerifyModel) *dtos.TLSVerify 
 	}
 
 	return &dtos.TLSVerify{
-		UseSNI:                   tlsVerify.UseSNI.ValueBool(),
-		SNIHintAndStrictSanCheck: tlsVerify.SNIHintAndStrictSanCheck.ValueString(),
-		AllowSelfSignedCerts:     tlsVerify.AllowSelfSignedCerts.ValueBool(),
-		PinnedCerts:              TypesListToStringSlice(tlsVerify.PinnedCerts),
+		UseSNI:                   tlsVerify.UseSNI.ValueBoolPointer(),
+		SNIHintAndStrictSanCheck: tlsVerify.SNIHintAndStrictSanCheck.ValueStringPointer(),
+		AllowSelfSignedCerts:     tlsVerify.AllowSelfSignedCerts.ValueBoolPointer(),
+		PinnedCerts:              TypesListToStringSlicePointer(tlsVerify.PinnedCerts),
 	}
 }
 
@@ -222,9 +230,9 @@ func convertNativeToTLSVerify(tlsVerify *dtos.TLSVerify) *models.TLSVerifyModel 
 	}
 
 	return &models.TLSVerifyModel{
-		UseSNI:                   types.BoolValue(tlsVerify.UseSNI),
-		SNIHintAndStrictSanCheck: types.StringValue(tlsVerify.SNIHintAndStrictSanCheck),
-		AllowSelfSignedCerts:     types.BoolValue(tlsVerify.AllowSelfSignedCerts),
+		UseSNI:                   types.BoolPointerValue(tlsVerify.UseSNI),
+		SNIHintAndStrictSanCheck: types.StringPointerValue(tlsVerify.SNIHintAndStrictSanCheck),
+		AllowSelfSignedCerts:     types.BoolPointerValue(tlsVerify.AllowSelfSignedCerts),
 		PinnedCerts:              StringSliceToTypesList(tlsVerify.PinnedCerts),
 	}
 }
@@ -233,18 +241,18 @@ func convertHostsToNative(hosts []models.HostModel) []dtos.Host {
 	var natives []dtos.Host
 	for _, host := range hosts {
 		natives = append(natives, dtos.Host{
-			Weight:                   int(host.Weight.ValueInt64()),
-			DNSMaxTTL:                uint32(host.DNSMaxTTL.ValueInt64()),
-			DNSPreference:            host.DNSPreference.ValueString(),
-			MaxHardPool:              uint16(host.MaxHardPool.ValueInt64()),
-			DNSMinTTL:                uint32(host.DNSMinTTL.ValueInt64()),
+			Weight:                   host.Weight.ValueInt64Pointer(),
+			DNSMaxTTL:                host.DNSMaxTTL.ValueInt64Pointer(),
+			DNSPreference:            host.DNSPreference.ValueStringPointer(),
+			MaxHardPool:              host.MaxHardPool.ValueInt64Pointer(),
+			DNSMinTTL:                host.DNSMinTTL.ValueInt64Pointer(),
 			Location:                 convertLocationToNative(host.Location),
-			MaxPool:                  uint16(host.MaxPool.ValueInt64()),
-			Balancer:                 host.Balancer.ValueString(),
-			Scheme:                   host.Scheme.ValueString(),
-			OverrideHostHeader:       host.OverrideHostHeader.ValueString(),
-			SNIHintAndStrictSanCheck: host.SNIHintAndStrictSanCheck.ValueString(),
-			UseSNI:                   host.UseSNI.ValueBool(),
+			MaxPool:                  host.MaxPool.ValueInt64Pointer(),
+			Balancer:                 host.Balancer.ValueStringPointer(),
+			Scheme:                   host.Scheme.ValueStringPointer(),
+			OverrideHostHeader:       host.OverrideHostHeader.ValueStringPointer(),
+			SNIHintAndStrictSanCheck: host.SNIHintAndStrictSanCheck.ValueStringPointer(),
+			UseSNI:                   host.UseSNI.ValueBoolPointer(),
 		})
 	}
 	return natives
@@ -254,41 +262,49 @@ func convertNativeToHosts(hosts []dtos.Host) []models.HostModel {
 	var m []models.HostModel
 	for _, host := range hosts {
 		m = append(m, models.HostModel{
-			Weight:                   types.Int64Value(int64(host.Weight)),
-			DNSMaxTTL:                types.Int64Value(int64(host.DNSMaxTTL)),
-			DNSPreference:            types.StringValue(host.DNSPreference),
-			MaxHardPool:              types.Int64Value(int64(host.MaxHardPool)),
-			DNSMinTTL:                types.Int64Value(int64(host.DNSMinTTL)),
+			Weight:                   types.Int64PointerValue(host.Weight),
+			DNSMaxTTL:                types.Int64PointerValue(host.DNSMaxTTL),
+			DNSPreference:            types.StringPointerValue(host.DNSPreference),
+			MaxHardPool:              types.Int64PointerValue(host.MaxHardPool),
+			DNSMinTTL:                types.Int64PointerValue(host.DNSMinTTL),
 			Location:                 convertNativeToLocation(host.Location),
-			MaxPool:                  types.Int64Value(int64(host.MaxPool)),
-			Balancer:                 types.StringValue(host.Balancer),
-			Scheme:                   types.StringValue(host.Scheme),
-			OverrideHostHeader:       types.StringValue(host.OverrideHostHeader),
-			SNIHintAndStrictSanCheck: types.StringValue(host.SNIHintAndStrictSanCheck),
-			UseSNI:                   types.BoolValue(host.UseSNI),
+			MaxPool:                  types.Int64PointerValue(host.MaxPool),
+			Balancer:                 types.StringPointerValue(host.Balancer),
+			Scheme:                   types.StringPointerValue(host.Scheme),
+			OverrideHostHeader:       types.StringPointerValue(host.OverrideHostHeader),
+			SNIHintAndStrictSanCheck: types.StringPointerValue(host.SNIHintAndStrictSanCheck),
+			UseSNI:                   types.BoolPointerValue(host.UseSNI),
 		})
 	}
 	return m
 }
 
-func convertLocationToNative(locations []models.LocationModel) []dtos.Location {
+func convertLocationToNative(locations *[]models.LocationModel) *[]dtos.Location {
+	if locations == nil {
+		return nil
+	}
+
 	var natives []dtos.Location
-	for _, location := range locations {
+	for _, location := range *locations {
 		natives = append(natives, dtos.Location{
-			Port:     int(location.Port.ValueInt64()),
-			Hostname: location.Hostname.ValueString(),
+			Port:     location.Port.ValueInt64Pointer(),
+			Hostname: location.Hostname.ValueStringPointer(),
 		})
 	}
-	return natives
+	return &natives
 }
 
-func convertNativeToLocation(locations []dtos.Location) []models.LocationModel {
+func convertNativeToLocation(locations *[]dtos.Location) *[]models.LocationModel {
+	if locations == nil {
+		return nil
+	}
+
 	var m []models.LocationModel
-	for _, location := range locations {
+	for _, location := range *locations {
 		m = append(m, models.LocationModel{
-			Port:     types.Int64Value(int64(location.Port)),
-			Hostname: types.StringValue(location.Hostname),
+			Port:     types.Int64PointerValue(location.Port),
+			Hostname: types.StringPointerValue(location.Hostname),
 		})
 	}
-	return m
+	return &m
 }

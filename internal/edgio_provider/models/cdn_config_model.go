@@ -28,18 +28,18 @@ type OriginModel struct {
 }
 
 type HostModel struct {
-	Weight                   types.Int64     `tfsdk:"weight"`
-	DNSMaxTTL                types.Int64     `tfsdk:"dns_max_ttl"`
-	DNSPreference            types.String    `tfsdk:"dns_preference"`
-	MaxHardPool              types.Int64     `tfsdk:"max_hard_pool"`
-	DNSMinTTL                types.Int64     `tfsdk:"dns_min_ttl"`
-	Location                 []LocationModel `tfsdk:"location"`
-	MaxPool                  types.Int64     `tfsdk:"max_pool"`
-	Balancer                 types.String    `tfsdk:"balancer"`
-	Scheme                   types.String    `tfsdk:"scheme"`
-	OverrideHostHeader       types.String    `tfsdk:"override_host_header"`
-	SNIHintAndStrictSanCheck types.String    `tfsdk:"sni_hint_and_strict_san_check"`
-	UseSNI                   types.Bool      `tfsdk:"use_sni"`
+	Weight                   types.Int64      `tfsdk:"weight"`
+	DNSMaxTTL                types.Int64      `tfsdk:"dns_max_ttl"`
+	DNSPreference            types.String     `tfsdk:"dns_preference"`
+	MaxHardPool              types.Int64      `tfsdk:"max_hard_pool"`
+	DNSMinTTL                types.Int64      `tfsdk:"dns_min_ttl"`
+	Location                 *[]LocationModel `tfsdk:"location"`
+	MaxPool                  types.Int64      `tfsdk:"max_pool"`
+	Balancer                 types.String     `tfsdk:"balancer"`
+	Scheme                   types.String     `tfsdk:"scheme"`
+	OverrideHostHeader       types.String     `tfsdk:"override_host_header"`
+	SNIHintAndStrictSanCheck types.String     `tfsdk:"sni_hint_and_strict_san_check"`
+	UseSNI                   types.Bool       `tfsdk:"use_sni"`
 }
 
 type LocationModel struct {
@@ -73,7 +73,7 @@ type HostnameModel struct {
 	Hostname          types.String `tfsdk:"hostname"`
 	DefaultOriginName types.String `tfsdk:"default_origin_name"`
 	ReportCode        types.Int64  `tfsdk:"report_code"`
-	TLS               TLSModel     `tfsdk:"tls"`
+	TLS               *TLSModel    `tfsdk:"tls"`
 	Directory         types.String `tfsdk:"directory"`
 }
 

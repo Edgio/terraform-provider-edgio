@@ -61,6 +61,14 @@ func PtrInt(i int) *int {
 	return &i
 }
 
+func PtrInt64(i int64) *int64 {
+	return &i
+}
+
+func ToPtr[T any](value T) *T {
+	return &value
+}
+
 // PtrFloat64 returns a pointer to a float64 value.
 func PtrFloat64(f float64) *float64 {
 	return &f

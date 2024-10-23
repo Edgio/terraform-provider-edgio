@@ -1,7 +1,8 @@
 terraform {
   required_providers {
     edgio = {
-      source = "hashicorp.com/edu/edgio"
+      source = "Edgio/edgio"
+      version = "0.1.0"
     }
   }
 }

@@ -20,31 +20,28 @@ func mockAllCDNConfigurationMethods(mockClient *edgio_api.MockEdgioClient, metho
 		ConfigurationID: "config-123",
 		EnvironmentID:   "env-123",
 		Rules: json.RawMessage(`
-		{
-			"test":123
-		}`),
+        {
+            "test":123
+        }`),
 		Origins: []dtos.Origin{
 			{
 				Name: "origin-1",
+				Type: "", // Add default value
 				Hosts: []dtos.Host{
 					{
-						Scheme:   "",
-						Weight:   200,
-						UseSNI:   false,
-						Balancer: "",
-						Location: []dtos.Location{
+						Weight: utility.ToPtr(int64(200)),
+						UseSNI: utility.ToPtr(false),
+						Location: utility.ToPtr([]dtos.Location{
 							{
-								Port:     443,
-								Hostname: "origin.example.com",
+								Port:     utility.ToPtr(int64(443)),
+								Hostname: utility.ToPtr("origin.example.com"),
 							},
-						},
-						MaxPool:                  0,
-						DNSMaxTTL:                3600,
-						DNSMinTTL:                600,
-						MaxHardPool:              10,
-						DNSPreference:            "ipv4",
-						OverrideHostHeader:       "",
-						SNIHintAndStrictSanCheck: "",
+						}),
+						MaxPool:       utility.ToPtr(int64(0)),
+						DNSMaxTTL:     utility.ToPtr(int64(3600)),
+						DNSMinTTL:     utility.ToPtr(int64(600)),
+						MaxHardPool:   utility.ToPtr(int64(10)),
+						DNSPreference: utility.ToPtr("ipv4"),
 					},
 				},
 				Balancer:            utility.PtrString("round_robin"),
@@ -54,18 +51,19 @@ func mockAllCDNConfigurationMethods(mockClient *edgio_api.MockEdgioClient, metho
 		},
 		Hostnames: []dtos.Hostname{
 			{
-				Hostname:          "cdn.example.com",
-				DefaultOriginName: "origin-1",
-				TLS: dtos.TLS{
-					NPN:                 true,
-					ALPN:                true,
-					Protocols:           "TLSv1.2",
-					UseSigAlgs:          true,
-					SNI:                 true,
-					SniStrict:           true,
-					SniHostMatch:        true,
-					ClientRenegotiation: false,
-					CipherList:          "ECDHE-RSA-AES128-GCM-SHA256",
+				Hostname:          utility.ToPtr("cdn.example.com"),
+				DefaultOriginName: utility.ToPtr("origin-1"),
+				TLS: &dtos.TLS{
+					NPN:                 utility.ToPtr(true),
+					ALPN:                utility.ToPtr(true),
+					Protocols:           utility.ToPtr("TLSv1.2"),
+					UseSigAlgs:          utility.ToPtr(true),
+					SNI:                 utility.ToPtr(true),
+					SniStrict:           utility.ToPtr(true),
+					SniHostMatch:        utility.ToPtr(true),
+					ClientRenegotiation: utility.ToPtr(false),
+					CipherList:          utility.ToPtr("ECDHE-RSA-AES128-GCM-SHA256"),
+					OCSP:                utility.ToPtr(false),
 				},
 			},
 		},
