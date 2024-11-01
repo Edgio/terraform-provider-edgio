@@ -2,6 +2,7 @@ package edgio_api
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"terraform-provider-edgio/internal/edgio_api/dtos"
 	"time"
@@ -377,58 +378,6 @@ func (c *EdgioClient) DeleteEnvironment(environmentID string) error {
 	return nil
 }
 
-func (c *EdgioClient) PurgeCache(purgeRequest *dtos.PurgeRequest) (*dtos.PurgeResponse, error) {
-	token, err := c.getToken("app.cache.purge")
-	if err != nil {
-		return nil, fmt.Errorf("failed to get token: %w", err)
-	}
-
-	url := fmt.Sprintf("%s/cache/v0.1/purge-requests", c.apiURL)
-	var purgeResponse dtos.PurgeResponse
-
-	resp, err := c.client.R().
-		SetAuthToken(token).
-		SetHeader("Content-Type", "application/json").
-		SetBody(purgeRequest).
-		SetResult(&purgeResponse).
-		Post(url)
-
-	if err != nil {
-		return nil, fmt.Errorf("error response: %s", err)
-	}
-
-	if resp.IsError() {
-		return nil, fmt.Errorf("error response: %s", resp.String())
-	}
-
-	return &purgeResponse, nil
-}
-
-func (c *EdgioClient) GetPurgeStatus(requestId string) (*dtos.PurgeResponse, error) {
-	token, err := c.getToken("app.cache.purge")
-	if err != nil {
-		return nil, fmt.Errorf("failed to get token: %w", err)
-	}
-
-	url := fmt.Sprintf("%s/cache/v0.1/purge-requests/%s", c.apiURL, requestId)
-	var purgeStatus dtos.PurgeResponse
-
-	resp, err := c.client.R().
-		SetAuthToken(token).
-		SetResult(&purgeStatus).
-		Get(url)
-
-	if err != nil {
-		return nil, fmt.Errorf("error response: %s", err)
-	}
-
-	if resp.IsError() {
-		return nil, fmt.Errorf("error response: %s", resp.String())
-	}
-
-	return &purgeStatus, nil
-}
-
 func (c *EdgioClient) GetTlsCert(tlsCertId string) (*dtos.TLSCertResponse, error) {
 	token, err := c.getToken("app.config")
 	if err != nil {
@@ -542,6 +491,9 @@ func (c *EdgioClient) GetTlsCerts(page int, pageSize int, environmentID string) 
 }
 
 func (c *EdgioClient) UploadCdnConfiguration(config *dtos.CDNConfiguration) (*dtos.CDNConfiguration, error) {
+
+	fmt.Println("------------------------------------------------------------------------- uploading")
+
 	token, err := c.getToken("app.config")
 	if err != nil {
 		return nil, fmt.Errorf("failed to get token: %w", err)
@@ -549,6 +501,13 @@ func (c *EdgioClient) UploadCdnConfiguration(config *dtos.CDNConfiguration) (*dt
 
 	url := fmt.Sprintf("%s/config/v0.1/configs", c.apiURL)
 	var response dtos.CDNConfiguration
+
+	// Convert config to json
+	jsonBody, _ := json.MarshalIndent(config, "", "    ")
+	jsonString := string(jsonBody)
+	fmt.Println("------------------------- config report code: ", config.Hostnames[0].ReportCode == nil)
+	fmt.Println("------------------------- config report code value: ", config.Hostnames[0].ReportCode)
+	fmt.Println("----------------------------------- jsonBody: ", jsonString)
 
 	resp, err := c.client.R().
 		SetAuthToken(token).
@@ -569,6 +528,8 @@ func (c *EdgioClient) UploadCdnConfiguration(config *dtos.CDNConfiguration) (*dt
 }
 
 func (c *EdgioClient) GetCDNConfiguration(configID string) (*dtos.CDNConfiguration, error) {
+	fmt.Println("------------------------------------------------------------------------- reading config")
+
 	token, err := c.getToken("app.config")
 	if err != nil {
 		return nil, fmt.Errorf("failed to get token: %w", err)

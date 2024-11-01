@@ -26,7 +26,6 @@ func mockAllCDNConfigurationMethods(mockClient *edgio_api.MockEdgioClient, metho
 		Origins: []dtos.Origin{
 			{
 				Name: "origin-1",
-				Type: "", // Add default value
 				Hosts: []dtos.Host{
 					{
 						Weight: utility.ToPtr(int64(200)),
@@ -44,9 +43,9 @@ func mockAllCDNConfigurationMethods(mockClient *edgio_api.MockEdgioClient, metho
 						DNSPreference: utility.ToPtr("ipv4"),
 					},
 				},
-				Balancer:            utility.PtrString("round_robin"),
-				OverrideHostHeader:  utility.PtrString("example.com"),
-				PciCertifiedShields: utility.PtrBool(false),
+				Balancer:            utility.ToPtr("round_robin"),
+				OverrideHostHeader:  utility.ToPtr("example.com"),
+				PciCertifiedShields: utility.ToPtr(false),
 			},
 		},
 		Hostnames: []dtos.Hostname{
@@ -63,7 +62,6 @@ func mockAllCDNConfigurationMethods(mockClient *edgio_api.MockEdgioClient, metho
 					SniHostMatch:        utility.ToPtr(true),
 					ClientRenegotiation: utility.ToPtr(false),
 					CipherList:          utility.ToPtr("ECDHE-RSA-AES128-GCM-SHA256"),
-					OCSP:                utility.ToPtr(false),
 				},
 			},
 		},
@@ -105,11 +103,9 @@ func TestCDNConfigurationResource_Lifecycle(t *testing.T) {
 						{
 							name: "origin-1",
 							hosts: [
-							{
-								scheme: "",
+							{					
 								weight: 200,
-								use_sni: false,
-								balancer: "",
+								use_sni: false,					
 								location: [
 								{
 									port: 443,
@@ -120,9 +116,7 @@ func TestCDNConfigurationResource_Lifecycle(t *testing.T) {
 								dns_max_ttl: 3600,
 								dns_min_ttl: 600,
 								max_hard_pool: 10,
-								dns_preference: "ipv4",
-								override_host_header: "",
-								sni_hint_and_strict_san_check: ""
+								dns_preference: "ipv4",					
 							}
 							],
 							balancer: "round_robin",

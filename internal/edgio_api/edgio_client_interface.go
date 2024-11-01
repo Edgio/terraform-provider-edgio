@@ -16,8 +16,6 @@ type EdgioClientInterface interface {
 	CreateEnvironment(propertyID, name string, onlyMaintainersCanDeploy, httpRequestLogging bool) (*dtos.Environment, error)
 	UpdateEnvironment(environmentID, name string, onlyMaintainersCanDeploy, httpRequestLogging, preserveCache bool) (*dtos.Environment, error)
 	DeleteEnvironment(environmentID string) error
-	PurgeCache(purgeRequest *dtos.PurgeRequest) (*dtos.PurgeResponse, error)
-	GetPurgeStatus(requestId string) (*dtos.PurgeResponse, error)
 	GetTlsCert(tlsCertId string) (*dtos.TLSCertResponse, error)
 	UploadTlsCert(req dtos.UploadTlsCertRequest) (*dtos.TLSCertResponse, error)
 	GenerateTlsCert(environmentId string) (*dtos.TLSCertResponse, error)

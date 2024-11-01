@@ -6,6 +6,8 @@ import (
 	"os"
 	"strings"
 	"time"
+
+	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
 func RunIntegrationTests() bool {
@@ -51,30 +53,36 @@ func RandomString(length int) string {
 // The following are functions that return pointers to primitive types as this
 // seems like a major flaw of go's type system.
 
-// PtrString returns a pointer to a string value.
-func PtrString(s string) *string {
-	return &s
-}
-
-// PtrInt returns a pointer to an int value.
-func PtrInt(i int) *int {
-	return &i
-}
-
-func PtrInt64(i int64) *int64 {
-	return &i
-}
-
 func ToPtr[T any](value T) *T {
 	return &value
 }
 
-// PtrFloat64 returns a pointer to a float64 value.
-func PtrFloat64(f float64) *float64 {
-	return &f
+func ToPtrString(value types.String) *string {
+	if value.IsNull() || value.IsUnknown() {
+		return nil
+	}
+
+	valueString := value.ValueString()
+
+	return &valueString
 }
 
-// PtrBool returns a pointer to a bool value.
-func PtrBool(b bool) *bool {
-	return &b
+func ToPtrInt64(value types.Int64) *int64 {
+	if value.IsNull() || value.IsUnknown() {
+		return nil
+	}
+
+	valueInt64 := value.ValueInt64()
+
+	return &valueInt64
+}
+
+func ToPtrBool(value types.Bool) *bool {
+	if value.IsNull() || value.IsUnknown() {
+		return nil
+	}
+
+	valueBool := value.ValueBool()
+
+	return &valueBool
 }

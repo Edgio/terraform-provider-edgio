@@ -2,15 +2,16 @@ package edgio_provider
 
 import (
 	"context"
-	"terraform-provider-edgio/internal/edgio_api"
-	"terraform-provider-edgio/internal/edgio_provider/data_sources"
-	"terraform-provider-edgio/internal/edgio_provider/resources"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+
+	"terraform-provider-edgio/internal/edgio_api"
+	"terraform-provider-edgio/internal/edgio_provider/data_sources"
+	"terraform-provider-edgio/internal/edgio_provider/resources"
 )
 
 // Provider implements the provider.Provider interface.

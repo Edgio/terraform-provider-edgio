@@ -64,6 +64,11 @@ func TypesListToIntSlicePointer(list types.List) *[]int64 {
 }
 
 func StringMapToMapValue(m *map[string]string) types.Map {
+	if m == nil {
+		mapValue, _ := types.MapValue(types.StringType, nil)
+		return mapValue
+	}
+
 	elements := make(map[string]attr.Value, len(*m))
 	for k, v := range *m {
 		elements[k] = types.StringValue(v)
@@ -86,6 +91,10 @@ func MapValueToStringMap(m types.Map) map[string]string {
 }
 
 func MapValueToStringMapPointer(m types.Map) *map[string]string {
+	if m.IsNull() || m.IsUnknown() {
+		return nil
+	}
+
 	result := MapValueToStringMap(m)
 	return &result
 }
