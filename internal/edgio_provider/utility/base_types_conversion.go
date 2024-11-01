@@ -41,7 +41,7 @@ func IntSliceToTypesList(slice *[]int64) types.List {
 
 	elements := make([]attr.Value, len(*slice))
 	for i, v := range *slice {
-		elements[i] = types.Int64Value(int64(v))
+		elements[i] = types.Int64Value(v)
 	}
 
 	list, _ := types.ListValue(types.StringType, elements)
