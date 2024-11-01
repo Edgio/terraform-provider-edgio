@@ -36,7 +36,7 @@ var (
 func (p *Provider) Metadata(ctx context.Context, request provider.MetadataRequest, response *provider.MetadataResponse) {
 	// Set the provider metadata (optional)
 	response.TypeName = "edgio"
-	response.Version = "0.1.0"
+	response.Version = "1.0.0"
 }
 
 // Configure configures the provider with user-provided configuration.
