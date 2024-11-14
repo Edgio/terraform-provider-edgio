@@ -9,18 +9,18 @@ terraform {
 
 variable "client_id" { type = string }
 variable "client_secret" {  type = string }
-variable "organization_id" { type = string }
+variable "property_id" { type = string }
 
 provider "edgio" {
   client_id     = var.client_id
   client_secret = var.client_secret
 }
 
-data "edgio_properties" "my_properties" {
+data "edgio_environments" "my_environments" {
   item_count = 100
-  organization_id = var.organization_id
+  property_id = var.property_id
 }
 
-output "properties" {
-  value = data.edgio_properties.my_properties.properties
+output "environments" {
+  value = data.edgio_environments.my_envirovments.environments
 }

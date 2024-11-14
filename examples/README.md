@@ -7,14 +7,16 @@ are requiring them. You can set them in your shell or in a file (e.g. `env.sh`, 
 export TF_VAR_client_id=f8c....
 export TF_VAR_client_secret=veBWK...
 export TF_VAR_organization_id=6b1...
+export TF_VAR_property_id=334...
 ```
 
 Then you can run the example (e.g. property):
 
 ```shell
 cd examples
+cd resources
 cd property
-terraform init
+terraform plan
 terraform apply
 ```
 
