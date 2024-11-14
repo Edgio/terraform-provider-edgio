@@ -148,6 +148,11 @@ func (r *TLSCertsResource) Create(ctx context.Context, req resource.CreateReques
 		tlsRes = *res
 	}
 
+	if tlsRes.Status == "failed" {
+		resp.Diagnostics.AddError("Error Uploading TLS Cert", fmt.Sprintf("Error: %s", tlsRes.ActivationError))
+		return
+	}
+
 	newState := utility.ConvertTlsCertsToModel(&tlsRes)
 	newState.PrivateKey = plan.PrivateKey
 	diags = resp.State.Set(ctx, &newState)
