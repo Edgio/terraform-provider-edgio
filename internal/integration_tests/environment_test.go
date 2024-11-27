@@ -51,7 +51,7 @@ func TestEnvironment_Lifecycle(t *testing.T) {
 	})
 }
 
-func getEnvConfig(clientID, clientSecret, organizationID, propertySlug, envName string, canMembersDeploy, httpRequestLogging bool) string {
+func getEnvConfig(clientID, clientSecret, organizationID, propertySlug, envName string, onlyMaintainersCanDeploy, httpRequestLogging bool) string {
 	return fmt.Sprintf(`
 	provider "edgio" {
 		client_id     = "%s"
@@ -68,5 +68,5 @@ func getEnvConfig(clientID, clientSecret, organizationID, propertySlug, envName 
 		name                = "%s"
 		only_maintainers_can_deploy  = %t
 		http_request_logging = %t
-	}`, clientID, clientSecret, organizationID, propertySlug, envName, canMembersDeploy, httpRequestLogging)
+	}`, clientID, clientSecret, organizationID, propertySlug, envName, onlyMaintainersCanDeploy, httpRequestLogging)
 }
