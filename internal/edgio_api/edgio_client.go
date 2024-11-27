@@ -326,6 +326,7 @@ func (c *EdgioClient) UpdateEnvironment(environmentID, name string, onlyMaintain
 		"name": name,
 		// as can_members_deploy is depricated, but update api is not
 		// we need to use it to map onlyMaintainersCanDeploy
+		"can_members_deploy":          !onlyMaintainersCanDeploy,
 		"only_maintainers_can_deploy": onlyMaintainersCanDeploy,
 		"http_request_logging":        httpRequestLogging,
 		"preserve_cache":              preserveCache,
